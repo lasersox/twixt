@@ -1,0 +1,36 @@
+$def with (name, waiting_players)
+
+<html><body>
+<h1> TwixT </h1>
+
+<p> Hello $name! </p>
+
+<p> You can start a new game </p>
+
+<p>
+  <form action='new/' method="POST">
+    <input type="submit" value="Start a new game."/>
+  </form>
+</p>
+
+<p> or you can join a game with one of these people </p> 
+
+<p>
+<form action='join/' method='POST'>
+
+$if waiting_players:
+    <select name='opponent'>
+    $for pname in waiting_players:
+        $if pname != name:
+            <option value="$pname"> $pname </option>
+    
+$else:
+    <select name='opponent' disabled>
+      <option value=""> No one is waiting… </option>
+
+  </select>
+  <input type="submit" value="join!">
+</form>
+</p>
+
+</body></html>

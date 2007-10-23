@@ -1,0 +1,9 @@
+Options +ExecCGI
+AddHandler cgi-script .py
+
+RewriteEngine On
+Options +FollowSymlinks
+RewriteBase /cgi-bin/twixt/
+RewriteRule ^$              index.py/    [L]
+RewriteRule ^index\.py(.*)$ -           [L]
+RewriteRule ^(.*)$          index.py/$1
