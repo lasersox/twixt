@@ -20,7 +20,13 @@ urls = (
 )
 
 def render_game_board(game):
-  import Image, ImageDraw
+  try:
+    import Image, ImageDraw
+  except ImportError:
+    import sys
+    sys.stderr.write("Execution failed because the required “Python Imaging Library” is missing.\n"\
+                     "Get it here: http://www.pythonware.com/products/pil/")
+    sys.exit(1)
   
   player_color = {game.player1 : "#000000", game.player2: "#FF0000", "": None}
   
