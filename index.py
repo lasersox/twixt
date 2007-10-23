@@ -1,4 +1,5 @@
 #!/usr/local/bin/python2.4
+# coding: utf-8
 
 import os, cPickle, fcntl
 import sha
@@ -40,7 +41,7 @@ def render_game_board(game):
     opts = {"outline":"#000000", "fill": player_color[node.owner]}
     draw.ellipse([trans(node), trans(node)], **opts)
 
-  del draw
+  del draw    
   im.save("./static/%s.png" % game.id)
     
 def load_current_player():
