@@ -1,4 +1,3 @@
-#!/usr/local/bin/python2.4
 # coding: utf-8
 
 import os, cPickle, fcntl
