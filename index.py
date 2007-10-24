@@ -25,22 +25,51 @@ def render_game_board(game):
   except ImportError:
     import sys
     sys.stderr.write("Execution failed because the required “Python Imaging Library” is missing.\n"\
-                     "Get it here: http://www.pythonware.com/products/pil/")
+                     "Get it here: http://www.pythonware.com/products/pil/\n")
     sys.exit(1)
   
-  player_color = {game.player1 : "#000000", game.player2: "#FF0000", "": None}
+  player_color = {game.player1 : "#4444FF", game.player2: "#FF4444", "": "#aaaaaa"}
   
-  im = Image.new("RGB", (600, 600))
-  draw = ImageDraw.Draw(im)
+  m = 32
+  r = 4
   
-  trans = lambda nd: (24 * nd.x + 24, 24 * nd.y + 24)
+  size = (game.size[0] + 1) * m, (game.size[1] + 1) * m
+  im = Image.new("RGB", size)
+  
+  try:
+    import aggdraw
+    draw = aggdraw.Draw(im)
+    p = aggdraw.Pen("black", 1)
+    player_brush = {game.player1 : aggdraw.Brush(player_color[game.player1]),
+                    game.player2 : aggdraw.Brush(player_color[game.player2]),
+                    ""           : aggdraw.Brush(player_color[''])}
+    print "Using aggdraw..."
+  except ImportError:
+    aggdraw = None
+    draw = ImageDraw.Draw(im)
+
+  if aggdraw is not None:
+    draw.rectangle([0, 0, size[0], size[1]], aggdraw.Brush("white"))
+  else:
+    draw.rectangle([0, 0, size[0], size[1]], fill="#FFFFFF")
+    
+  left_top = lambda nd: (int(m*(nd.x+1) - r), int(m*(nd.y+1) + r))
+  left_bot = lambda nd: (int(m*(nd.x+1) - r), int(m*(nd.y+1) - r))
+  righ_top = lambda nd: (int(m*(nd.x+1) + r), int(m*(nd.y+1) + r))
+  righ_bot = lambda nd: (int(m*(nd.x+1) + r), int(m*(nd.y+1) - r))
   
   for node in game.nodes.values():
+    print "Drawing %s..." % node
     owner = node.owner
-    opts = {"outline":"#000000", "fill": player_color[node.owner]}
-    draw.ellipse([trans(node), trans(node)], **opts)
+    box = left_bot(node) + righ_top(node)
+    if aggdraw is not None:
+      draw.ellipse(box, p, player_brush[node.owner])
+    else:
+      draw.ellipse(box, fill=player_color[node.owner], outline="#000000")
 
-  del draw    
+  if aggdraw is not None:
+    draw.flush()
+  del draw
   im.save("./static/%s.png" % game.id)
     
 def load_current_player():
