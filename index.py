@@ -84,12 +84,16 @@ def load_current_player():
   else:
     raise Exception("Bad secret.")
 
+def GameError(Exception):
+  pass
+
 def load_current_game(p):
   try:
     f = open("state/game_%s" % p.game_id, 'w')
     g = cPickle.load(game, f)
   except:
     f.close()
+    raise GameError("Could not open game state.")
   return g
 
 def save_game(game):
@@ -118,6 +122,10 @@ class PlayerExistsException(Exception):
   pass
   
 class Player(object):
+  pass
+
+class HumanPlayer(Player):
+  
   def __init__(self, name, secret):
     self.name   = name
     self.secret = sha.sha(secret).hexdigest()
@@ -152,6 +160,24 @@ class Player(object):
         raise PlayerSecretException("Invalid secret.")
     else:
       return Player(name, secret).save()
+    
+class ComputerPlayer(Player):
+  
+  def __init__(self, name):
+    self.name = name
+
+  def next_move(self, nodes):
+    (x,y) = (1,1)
+    return (x,y)
+    
+class ThanhsComputerPlayer(ComputerPlayer):
+  pass
+
+class LanfrancosComputerPlayer(ComputerPlayer):
+  pass
+
+class AlexsComputerPlayer(ComputerPlayer):
+  pass
 
 ## url handlers
 
