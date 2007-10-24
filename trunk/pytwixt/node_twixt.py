@@ -120,7 +120,7 @@ class Twixt(object):
     
     def claim_node(self, (x,y), player):
         """ Give ownership of the node at `(x,y)` to `player`. """
-        if not self.nodes[x,y].owner:
+        if self.nodes[x,y].owner:
             raise NodeError("The node at x,y is already owned.")
         if not self.nodes[x,y].reservee in [player, ""]:
             raise NodeError("This node is reserved.")
