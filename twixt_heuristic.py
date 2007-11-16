@@ -10,7 +10,7 @@ def f_1(game, player):
 	return total / (game.size[0] * game.size[1])
 
 def f_2(game, player):
-	pass
+	return f_1(game, player) - f_1(game, game.player2)
 
 def f_3(game, player):
 	pass
@@ -22,7 +22,7 @@ def f_5(game, player):
 	pass
 
 def f_6(game, player):
-	pass
+	return 1 / f_4(game, game.player)
 
 def f_7(game, player):
 	pass
