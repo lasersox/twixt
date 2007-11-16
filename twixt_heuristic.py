@@ -16,7 +16,7 @@ def f_3(game, player):
 	pass
 
 def f_4(game, player):
-	""" looping through all the bridges and project it to the vertical axis
+	""" looping through all the bridges and project it to the vertical axis """
 	distance = 0
 	vnodes = [0]*game.size
 	bridges = game.connections(player)
@@ -30,7 +30,7 @@ def f_4(game, player):
 
 
 def f_5(game, player):
-	""" looping through all the bridges and project it to the vertical axis
+	""" looping through all the bridges and project it to the vertical axis """
 	distance = 0
 	hnodes = [0]*game.size
 	bridges = game.connections(player)
@@ -44,11 +44,10 @@ def f_5(game, player):
 
 
 def f_6(game, player):
-	return 1 / f_4(game, game.player)
+	return 1 / f_4(game, player)
 
 def f_7(game, player):
-	pass
+	return 1 / f_5(game, player)
 
 def f_8(game, player):
 	pass
-
