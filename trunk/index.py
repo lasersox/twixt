@@ -1,12 +1,12 @@
 # coding: utf-8
 
-import os, cPickle, fcntl
+import os, cPickle
 import sha
 import web
 from pytwixt import node_twixt as twixt
 
 
-console = open("/dev/console", "w")
+#console = open("/dev/console", "w")
 
 render = web.template.render('templates/', cache=False)
 
@@ -166,7 +166,7 @@ class ComputerPlayer(Player):
   def __init__(self, name):
     self.name = name
 
-  def next_move(self, nodes):
+  def next_move(self, game):
     (x,y) = (1,1)
     return (x,y)
     
@@ -174,7 +174,7 @@ class ThanhsComputerPlayer(ComputerPlayer):
   pass
 
 class LanfrancosComputerPlayer(ComputerPlayer):
-  pass
+    pass
 
 class AlexsComputerPlayer(ComputerPlayer):
   pass

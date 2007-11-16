@@ -217,4 +217,7 @@ class Twixt(object):
                     marked.add(node)
                     stack.append(node)
         return False
-    
+# Return the opposing player    
+    def opponent(self, player):
+#        return (player == self.player1 ? self.player2 : player1)
+        return self.player2 if player == self.player1 else self.player1
