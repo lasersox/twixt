@@ -1,5 +1,13 @@
+from math import *
+
 def f_1(game, player):
-	pass
+	""" Compute total length of bridges for player. """
+	conn_len = sqrt(1.**2 + 2.**2)
+	total = 0
+	for conn in game.connections:
+		if conn.p0.owner == player and conn.p1.owner == player:
+			total += conn_len
+	return total / (game.size[0] * game.size[1])
 
 def f_2(game, player):
 	pass
