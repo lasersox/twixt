@@ -95,13 +95,53 @@ def f_8(game, player):
 	
 def get_next_states(game,player,depth):
 	""" generate all possible game states at depth ahead 
-	1. Notice, make sure return (game,node) """
-	next_states = []
-	for i in range(depth) :
-		get_next_states(game,player,1)
+	1. Notice, make sure return (game,node) 
+	Comment: Using array to store the tree: A node will be an array of [[Current],[Childrent],[Move]]"""
+	parrent = [game,[], []]
+	parrent = get_next_recur_states(parrent, player, depth)
+	return parrent		
+
+def get_next_recur_states(parrent, player, depth):
+	""" Using recursion to generate next states recursively 
+	Note: a node is [game, chidren, move]"""
 	
+	# get all the valid nodes for this player
+	valid_nodes = get_valid_nodes(parrent[0],player)
+        
+	# This is the leaf node
+	if depth == 1:	
+		for valid_node in valid_nodes:
+			# get a copy the current game board
+			temp_game = parrent[0]
+			# claim the avalaible node
+			temp_game.claim_node((valid_node.x, valid_node.y),player)
+			# add the new game board to as the child to the current node
+			parrent[1].append([temp_game,[],valid_node])    
+	else: #if not leaf, call recursively
+		for valid_node in valid_nodes:
+			# determine which player is in turn
+			if depth%2 == 0:
+				cur_player = parrent[0].opponent(player)
+				
+			temp_states = get_next_recur_states(parrent,cur_player,depth-1)
+			for temp_state in temp_states:
+				parrent[1].append(temp_state) 
 	
+	return parrent
+
+def get_next_loo_states(parrent, player, depth):
+	for i in range(depth):
+	   
+	   pass
+		
 def get_valid_nodes(game,player):
 	""" return the valid nodes for a player """
-	pass
+	valid_nodes = set()
+	for node in range(len(game.nodes)):
+		if node.owner == "" or node.reservee == player.name:
+			valid_nodes.add(node)
+			
+	return valid_nodes
+ 
+	
 
