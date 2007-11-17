@@ -186,31 +186,29 @@ class HumanPlayer(Player):
       return HumanPlayer(name, secret).save()
 
 class ComputerPlayer(Player):
-  	
-  	def __init__(self, name):
+    
+    def __init__(self, name):
             self.name = name
             self.heuristics = 10
             self.weights = [1/self.heuristics]*self.heuristics
-  	
-  	def next_move(self, game):
-  		""" Just looking at one step ahead for now 
-  		1. Generate all possible game states
-  		2. Evaluate h = w1*f1 + w2*f2 + w3*f3...
-  		3. Pick the best one (greedy breadth first search) """
-  		
-    	game_states = heuristic.get_next_states(game,self,1)
-    	h = set()
-    	
-        for game_state in game_states[1]:
-    		for i in range(self.heuristics):
-    			f += weight[i]*eval('f_'+str(i)+'(game_state[0], self)')
-    		h.add((f, game_state))
             
-    	next_node = max(h)[0][2]
+    def next_move(self, game):
+        """ Just looking at one step ahead for now 
+        1. Generate all possible game states
+        2. Evaluate h = w1*f1 + w2*f2 + w3*f3...
+        3. Pick the best one (greedy breadth first search) """
+        
+        game_states = heuristic.get_next_states(game,self,1)
+        h = set()
+        
+        for game_state in game_states[1]:
+            for i in range(self.heuristics):
+                f += weight[i]*eval('f_'+str(i)+'(game_state[0], self)')
+            h.add((f, game_state))
+            
+        next_node = max(h)[2]
         return (next_node.x, next_node.y)
-    	
-    	 
-   
+
 
 class ThanhsComputerPlayer(ComputerPlayer):
   def next_move(self, game):
