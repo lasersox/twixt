@@ -4,8 +4,7 @@ import os, cPickle
 import sha
 import web
 from pytwixt import node_twixt as twixt
-
-
+import twixt_heuristic as heuristic
 # console = open("/dev/console", "w")
 
 render = web.template.render('templates/', cache=False)
@@ -180,9 +179,9 @@ class HumanPlayer(Player):
 class ComputerPlayer(Player):
   	
   	def __init__(self, name):
-    	self.name = name
-    	self.heuristics = 10
-    	self.weights = [1/self.heuristics]*self.heuristics
+            self.name = name
+            self.heuristics = 10
+            self.weights = [1/self.heuristics]*self.heuristics
   	
   	def next_move(self, game):
   		""" Just looking at one step ahead for now 
@@ -190,23 +189,21 @@ class ComputerPlayer(Player):
   		2. Evaluate h = w1*f1 + w2*f2 + w3*f3...
   		3. Pick the best one (greedy breadth first search) """
   		
-    	game_states = gen_next_states(game,self,1)
+    	game_states = heuristic.get_next_states(game,self,1)
     	h = set()
     	for game_state in game_states:
-    		for i in range(self.heuristics)
+    		for i in range(self.heuristics):
     			f += weight[i]*eval('f_'+str(i)+'(game_state[0], self)')
-    			
     		h.add(game_state,f)
-    		
     	next_node = max(h)[0][1]
-    	return (next_node.x,next_node.y)
+    	pass
     	 
    
 
 class ThanhsComputerPlayer(ComputerPlayer):
 	def next_move(self, game):
-    	(x,y) = (1,1)
-    	return (x,y)
+        	(x,y) = (1,1)
+        	return (x,y)
     	
 
 class LanfrancosComputerPlayer(ComputerPlayer):
