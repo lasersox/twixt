@@ -46,7 +46,7 @@ def render_game_board_image(game):
     player_pen = {game.player1 : aggdraw.Pen(player_color[game.player1], width=2),
                   game.player2 : aggdraw.Pen(player_color[game.player2], width=2),
                   ""           : aggdraw.Pen(player_color[''], width=2)}
-    print "Using aggdraw..."
+    # print "Using aggdraw..."
   except ImportError:
     aggdraw = None
     draw = ImageDraw.Draw(im)
@@ -69,7 +69,7 @@ def render_game_board_image(game):
           draw.line([center(conn.p0), center(conn.p1)], fill=player_color[conn.p0.owner], width=4)
   
   for node in game.nodes.values():
-    print "Drawing %s..." % node
+    # print "Drawing %s..." % node
     box = left_bot(node) + righ_top(node)
     if aggdraw is not None:
       draw.ellipse(box, p, player_brush[node.owner])
@@ -187,10 +187,10 @@ class HumanPlayer(Player):
 
 class ComputerPlayer(Player):
     
-    def __init__(self, name):
+    def __init__(self, name, weights=None):
             self.name = name
-            self.heuristics = 10
-            self.weights = [1/self.heuristics]*self.heuristics
+            self.heuristics = 8
+            self.weights = [1./self.heuristics]*self.heuristics if not weights else weights
             
     def next_move(self, game):
         """ Just looking at one step ahead for now 
@@ -198,15 +198,16 @@ class ComputerPlayer(Player):
         2. Evaluate h = w1*f1 + w2*f2 + w3*f3...
         3. Pick the best one (greedy breadth first search) """
         
-        game_states = heuristic.get_next_states(game,self,1)
-        h = set()
+        game_states = heuristic.get_next_states(game,self.name,1)
+        h = []
         
         for game_state in game_states[1]:
-            for i in range(self.heuristics):
-                f += weight[i]*eval('f_'+str(i)+'(game_state[0], self)')
-            h.add((f, game_state))
+            f = 0
+            for i in range(1,self.heuristics+1):
+                f += self.weights[i-1]*eval('heuristic.f_'+str(i)+'(game_state[0], self)')
+            h.append((f, game_state))
             
-        next_node = max(h)[2]
+        next_node = max(h)[1][2]
         return (next_node.x, next_node.y)
 
 
