@@ -13,12 +13,34 @@ def f_2(game, player):
 	return f_1(game, player) - f_1(game, game.player2)
 
 def f_3(game, player):
-	pass
+	""" checking for longest bridge  
+	bridges = list(game.connections(player))
+	conn_bridges = set()
+	
+	for bridge in bridges:
+		conn_nodes = set()
+		conn_nodes.add(bridge.p0)
+		conn_nodes.add(bridge.p1)
+		bridges.remove(bridge)
+		 
+		for bridge1 in bridges:
+			if bridge1.p0 in conn_nodes
+				conn_nodes.add(bridge.p1)
+				bridges.remove(bridge1)
+				
+			if bridge1.p1 in conn_nodes
+				conn_nodes.add(bridge.p0)
+				bridges.remove(bridge1)
+				
+		conn_bridges.add(len(conn_nodes)-1)
+		
+	""" checking for longest path		
+	return max(conn_bridges)/(game.size[0]*game.size[1])
 
 def f_4(game, player):
 	""" looping through all the bridges and project it to the vertical axis """
 	distance = 0
-	vnodes = [0]*game.size
+	vnodes = [0]*game.size[0]
 	bridges = game.connections(player)
 	
 	for bridge in bridges:
@@ -26,13 +48,13 @@ def f_4(game, player):
 		vnodes[bridge.p1.y] = 1
 		vnodes[round((bridge.p0.y + bridge.p1.y)/2)] = 1
 	
-	return sum(vnodes)/(game.size*game.size)
+	return sum(vnodes)/(game.size[0]*game.size[1])
 
 
 def f_5(game, player):
 	""" looping through all the bridges and project it to the vertical axis """
 	distance = 0
-	hnodes = [0]*game.size
+	hnodes = [0]*game.size[1]
 	bridges = game.connections(player)
 	
 	for bridge in bridges:
@@ -40,7 +62,7 @@ def f_5(game, player):
 		hnodes[bridge.p1.x] = 1
 		hnodes[round((bridge.p0.x + bridge.p1.x)/2)] = 1
 	
-	return sum(hnodes)/(game.size*game.size)
+	return sum(hnodes)/(game.size[0]*game.size[1])
 
 
 def f_6(game, player):
