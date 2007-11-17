@@ -19,7 +19,10 @@ urls = (
   '/',         'index'
 )
 
-def render_game_board(game):
+NODE_SPACING = 32
+NODE_RADIUS = 4
+
+def render_game_board_image(game):
   try:
     import Image, ImageDraw
   except ImportError:
@@ -28,8 +31,8 @@ def render_game_board(game):
   
   player_color = {game.player1 : "#4444FF", game.player2: "#FF4444", "": "#aaaaaa"}
   
-  m = 32
-  r = 4
+  m = EDGE_SPACING
+  r = NODE_RADIUS
   
   size = (game.size[0] + 1) * m, (game.size[1] + 1) * m
   im = Image.new("RGB", size)
@@ -70,6 +73,14 @@ def render_game_board(game):
   del draw
   im.save("./static/%s.png" % game.id)
 
+def area_tags(game):
+    m = NODE_SPACING
+    tags = []
+    t = "%i,%i,%i"
+    for nd in game.nodes.values():
+        tags.append((t % (int(m*(nd.x+1)), int(m*(nd.y+1)), NODE_RADIUS), "%i,%i" % (nd.x,nd.y)))
+    return tags
+
 def load_current_player():
   p = None
   c = web.cookies()
@@ -87,19 +98,26 @@ def GameError(Exception):
 
 def load_current_game(p):
   try:
-    f = open("state/game_%s" % p.game_id, 'w')
-    g = cPickle.load(game, f)
-  except:
+    import sys
+    sys.stderr.write("%s\n" % p.game_id)
+    f = open("state/game_%s" % p.game_id)
+    g = cPickle.load(f)
     f.close()
-    raise GameError("Could not open game state.")
+    del f
+  except Exception, e:
+    f.close()
+    del f
+    raise e
   return g
 
 def save_game(game):
   try:
     f = open("state/game_%s" % game.id, 'w')
     cPickle.dump(game, f)
+    f.close()
   except:
     f.close()
+  del f
 
 def waiting_players():
   if os.path.exists('state/waiting_players'):
@@ -224,7 +242,7 @@ class join_game(object):
     opponent.game_id = game.id
     p.save(), opponent.save()
     game.current_player = game.player1
-    render_game_board(game)
+    render_game_board_image(game)
     save_game(game)
     web.seeother("/play/")
 
@@ -240,15 +258,19 @@ class play(object):
   def POST(self):
     p = load_current_player()
     g = load_current_game(p)
+    render_game_board_image(game)
+    print render.game_wait(g, p)
   
   
   def GET(self):
     p = load_current_player()
     g = load_current_game(p)
     if g.current_player == p.name:
-      print render.game_move(g, p)
+      print render.game_move(g, p, area_tags(g))
     else:
       print render.game_wait(g, p)
+    print 
+     
 
 class login(object):
   

@@ -97,3 +97,4 @@ def get_next_states(game,player,depth)
 	""" generate all possible game states at depth ahead 
 	1. Notice, make sure return (game,node) """
 	pass
+

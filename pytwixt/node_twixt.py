@@ -49,7 +49,7 @@ class Connection(object):
     def __init__(self, p0, p1):
         self.p0 = p0
         self.p1 = p1
-        # domain is a 2-tuple.  each connection is defined only on it's 
+        # domain is a 2-tuple.  each connection is defined only on it's
         # "domain", that is, the space between it's leftmost and rightmost
         # node.
         self.domain = tuple(sorted([p0.x, p1.x]))
@@ -57,7 +57,7 @@ class Connection(object):
         self.slope = float(p1.y - p0.y) / float(p1.x - p0.x)
         # y-intercept.
         self.intercept = float(p0.y - self.slope * p0.x)
-    
+
 
 def intersects(conn0, conn1):
     """
@@ -100,7 +100,7 @@ class Twixt(object):
         self.size = size
         self.nodes = {}
         # set up all nodes.
-        # notice: coords is a "generator comprehension".  this is like a 
+        # notice: coords is a "generator comprehension".  this is like a
         # list comprehension except that each element is only created as it
         # is requrested in the for loop.
         coords = ((x,y) for y in range(0, size[0]) for x in range(0, size[1]))
@@ -114,7 +114,7 @@ class Twixt(object):
                 self.nodes[x,y].reservee = player1
             elif y in [0, size[1]-1]:
                 self.nodes[x,y].reservee = player2
-
+    
     def __hash__(self):
       return hash(self.nodes)
     
@@ -125,7 +125,7 @@ class Twixt(object):
         if not self.nodes[x,y].reservee in [player, ""]:
             raise NodeError("This node is reserved.")
         self.nodes[x,y].owner = player
-        
+    
     def connect(self, (x0,y0), (x1,y1), player):
         """
         Connect node at `(x0,y0)` to node at `(x1,y1)` (and vice versa).
@@ -164,7 +164,7 @@ class Twixt(object):
             raise NodeError("%s is not connected to %s." % (node0, node1))
         node0.connected_nodes.remove(node1)
         node1.connected_nodes.remove(node0)
-     
+    
     def starting_nodes(self, player):
         """ Iterates over the *owned* starting nodes of `player`. """
         return self._owned_nodes(player, 'start')
@@ -198,7 +198,8 @@ class Twixt(object):
     def connections(self, player=None):
         marked = set()
         for node in self.nodes.itervalues():
-            if not (player is None or node.owner == player): continue
+            if not (player is None or node.owner == player):
+                continue
             marked.add(node)
             for other_node in node.connected_nodes:
                 if other_node in marked: continue
