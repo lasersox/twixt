@@ -90,7 +90,7 @@ class Twixt(object):
     The Twixt class should not maintain the turn state. Turn state is managed by
     the game driver.
     """
-    def __init__(self, player1, player2, size=(24,24)):
+    def __init__(self, player1, player2, size=(24,24), can_cross_self=True):
         """
         `player1` and `player2` can be any unique object.  Strings are
         generally ok.
@@ -195,9 +195,13 @@ class Twixt(object):
                 yield self.nodes[node(n)]
     
     @property
-    def connections(self):
+    def connections(self, player=None):
+		marked = set()
         for node in self.nodes.itervalues():
+			if not (player is None or node.owner == player): continue
+			marked.add(node)
             for other_node in node.connected_nodes:
+				if other_node in marked: continue
                 yield Connection(node, other_node)
     
     def has_won(self, player):
