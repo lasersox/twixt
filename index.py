@@ -1,6 +1,6 @@
 # coding: utf-8
 
-import os, cPickle
+import os, cPickle, sys
 import sha
 import web
 from pytwixt import node_twixt as twixt
@@ -30,7 +30,7 @@ def render_game_board_image(game):
   
   player_color = {game.player1 : "#4444FF", game.player2: "#FF4444", "": "#aaaaaa"}
   
-  m = EDGE_SPACING
+  m = NODE_SPACING
   r = NODE_RADIUS
   
   size = (game.size[0] + 1) * m, (game.size[1] + 1) * m
@@ -43,6 +43,9 @@ def render_game_board_image(game):
     player_brush = {game.player1 : aggdraw.Brush(player_color[game.player1]),
                     game.player2 : aggdraw.Brush(player_color[game.player2]),
                     ""           : aggdraw.Brush(player_color[''])}
+    player_pen = {game.player1 : aggdraw.Pen(player_color[game.player1], width=2),
+                  game.player2 : aggdraw.Pen(player_color[game.player2], width=2),
+                  ""           : aggdraw.Pen(player_color[''], width=2)}
     print "Using aggdraw..."
   except ImportError:
     aggdraw = None
@@ -58,9 +61,15 @@ def render_game_board_image(game):
   righ_top = lambda nd: (int(m*(nd.x+1) + r), int(m*(nd.y+1) + r))
   righ_bot = lambda nd: (int(m*(nd.x+1) + r), int(m*(nd.y+1) - r))
   
+  center = lambda nd: (int(m*(nd.x+1)), int(m*(nd.y+1)))
+  for conn in game.connections():
+      if aggdraw is not None:
+          draw.line(center(conn.p0) + center(conn.p1), player_pen[conn.p0.owner])
+      else:
+          draw.line([center(conn.p0), center(conn.p1)], fill=player_color[conn.p0.owner], width=4)
+  
   for node in game.nodes.values():
     print "Drawing %s..." % node
-    owner = node.owner
     box = left_bot(node) + righ_top(node)
     if aggdraw is not None:
       draw.ellipse(box, p, player_brush[node.owner])
@@ -95,18 +104,10 @@ def load_current_player():
 def GameError(Exception):
   pass
 
-def load_current_game(p):
-  try:
-    import sys
-    sys.stderr.write("%s\n" % p.game_id)
-    f = open("state/game_%s" % p.game_id)
-    g = cPickle.load(f)
-    f.close()
-    del f
-  except Exception, e:
-    f.close()
-    del f
-    raise e
+def load_game(game_id):
+  f = open("state/game_%s" % game_id)
+  g = cPickle.load(f)
+  f.close()
   return g
 
 def save_game(game):
@@ -137,7 +138,15 @@ class PlayerExistsException(Exception):
   pass
 
 class Player(object):
-  pass
+  
+  def __eq__(self, other):
+      if isinstance(other, Player):
+          return self.name == other.name
+      else:
+          return self.name == other
+          
+  def __hash__(self):
+      return hash(self.name)
 
 class HumanPlayer(Player):
   
@@ -201,16 +210,16 @@ class ComputerPlayer(Player):
    
 
 class ThanhsComputerPlayer(ComputerPlayer):
-	def next_move(self, game):
-        	(x,y) = (1,1)
-        	return (x,y)
-    	
+  def next_move(self, game):
+    (x,y) = (1,1)
+    return (x,y)
+      
 
 class LanfrancosComputerPlayer(ComputerPlayer):
-    pass
+  pass
 
 class AlexsComputerPlayer(ComputerPlayer):
-  	pass
+  pass
 
 ## url handlers
 
@@ -233,7 +242,7 @@ class join_game(object):
     p = load_current_player()
     wi = web.input()
     opponent = HumanPlayer.load(wi['opponent'])
-    game = twixt.Twixt(opponent.name, p.name)
+    game = twixt.Twixt(opponent.name, p.name, (10,10))
     game.id = sha.sha(game.player1 + game.player2).hexdigest()
     p.game_id        = game.id
     opponent.game_id = game.id
@@ -253,21 +262,29 @@ class waiting(object):
 
 class play(object):
   def POST(self):
+    wi = web.input()
     p = load_current_player()
-    g = load_current_game(p)
-    render_game_board_image(game)
-    print render.game_wait(g, p)
-  
+    g = load_game(p.game_id)
+    if g.current_player == p.name:
+      import re
+      m = re.match("([0-9]+)\,([0-9]+)", wi['twixt_node'])
+      move = (int(m.group(1)), int(m.group(2)))
+      try:
+        g.claim_node(move, p.name)
+        render_game_board_image(g)
+        g.current_player = g.opponent(p.name)
+        save_game(g)
+      except twixt.NodeError, e:
+        sys.stderr.write(repr(e))
+    web.seeother("/play/")
   
   def GET(self):
     p = load_current_player()
-    g = load_current_game(p)
+    g = load_game(p.game_id)
     if g.current_player == p.name:
       print render.game_move(g, p, area_tags(g))
     else:
       print render.game_wait(g, p)
-    print 
-     
 
 class login(object):
   
