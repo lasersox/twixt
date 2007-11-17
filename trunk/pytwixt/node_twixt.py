@@ -152,7 +152,7 @@ class Twixt(object):
                                 "another connection.")
         node0.connected_nodes.add(node1)
         node1.connected_nodes.add(node0)
-    
+        
     def disconnect(self, (x0,y0), (x1,y1), player):
         """ Disconnect node at `(x0,y0)` from node at `(x1,y1)` """
         node0 = self.nodes[x0,y0]
@@ -196,12 +196,12 @@ class Twixt(object):
     
     @property
     def connections(self, player=None):
-		marked = set()
+        marked = set()
         for node in self.nodes.itervalues():
-			if not (player is None or node.owner == player): continue
-			marked.add(node)
+            if not (player is None or node.owner == player): continue
+            marked.add(node)
             for other_node in node.connected_nodes:
-				if other_node in marked: continue
+                if other_node in marked: continue
                 yield Connection(node, other_node)
     
     def has_won(self, player):
@@ -221,7 +221,28 @@ class Twixt(object):
                     marked.add(node)
                     stack.append(node)
         return False
-# Return the opposing player    
+
     def opponent(self, player):
-#        return (player == self.player1 ? self.player2 : player1)
+        """ Return player's opponent """
         return self.player2 if player == self.player1 else self.player1
+    
+    def new_node_connectable (self, node0, node1):
+        """
+        Check to see whether node0 can be connected to node1. It is assumed
+        that node0 is the one from which we try to connect to node1. node1's
+        state is unknown when this method is called.
+        The two nodes are "connectable" if the following hold
+        true:
+            1. Both nodes have the same owner, or node1 is free
+            2. There is no connection from two other nodes which would
+               cross the new connection.
+        """
+        player = node0.owner
+        if ((player is node1.owner) or (not node1.owner)):
+            conn = Connection(node0, node1)
+            for other_conn in self.connections:
+                if intersects(conn, other_conn):
+                    return false
+        else:
+            return false
+        return true
