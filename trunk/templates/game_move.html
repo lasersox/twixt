@@ -1,1 +1,25 @@
-$def with (game, player)
+$def with (game, player, area_tags)
+
+<html>
+    <style>
+        area:hover {cursor: pointer;}
+    </style>
+    <script>
+        function update_move(s) {
+            document.twixt_move.twixt_node.value = s;
+        }
+    </script
+    <body>
+    <p> Your move... </p>
+    <p>
+        <form name='twixt_move' method="POST" url="/play/">
+            <input name="twixt_node" type="text" value=""/>
+            <input type="submit"/>
+        </form></p>
+    <p>
+        <map name="nodes">
+            $for a in area_tags:
+                <area shape="circle" coords = "$a[0]" onclick="document.forms[0].elements[0].value = '$a[1]';"/>
+        <img usemap="#nodes" src="/static/${game.id}.png" />
+    </p>
+</body></html>
