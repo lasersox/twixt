@@ -25,11 +25,11 @@ def f_3(game, player):
 		bridges.remove(bridge)
 		 
 		for bridge1 in bridges:
-			if bridge1.p0 in conn_nodes
+			if bridge1.p0 in conn_nodes:
 				conn_nodes.add(bridge.p1)
 				bridges.remove(bridge1)
 				
-			if bridge1.p1 in conn_nodes
+			if bridge1.p1 in conn_nodes:
 				conn_nodes.add(bridge.p0)
 				bridges.remove(bridge1)
 				
