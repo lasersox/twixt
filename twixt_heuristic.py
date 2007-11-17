@@ -78,23 +78,30 @@ def f_8(game, player):
 	""" Evaluate the ability to extend the current bridges """
 	ext_bridges = 0
 
-	for node0 in game.nodes
-		if node0.owner == player.name
-			for node1 in game.nodes
-				if node1.owner = "" and node1.reservee != game.opponent(player).name
-					xdif, ydif = abs(node0.x - node1.x), abs(node0.y - node1.y)
-					if !((xdif != 1 or ydif != 2) and (ydif != 1 or xdif != 2)):						
-						""" check for intersection """
-						conn = Connection(node0, node1)
-						for other_conn in self.connections:
-							if !intersects(conn, other_conn):
-								ext_bridges += 1
-	
+	for node0 in game.nodes:
+			if node0.owner == player.name:
+				for node1 in game.nodes:
+					if node1.owner == "" and node1.reservee != game.opponent(player).name:
+						xdif, ydif = abs(node0.x - node1.x), abs(node0.y - node1.y)
+						if ((xdif != 1 or ydif != 2) and (ydif != 1 or xdif != 2))== False:						
+							""" check for intersection """
+							conn = Connection(node0, node1)
+							for other_conn in self.connections:
+								if intersects(conn, other_conn) == False:
+									ext_bridges += 1
+		
 	return ext_bridges		
 	
 	
-def get_next_states(game,player,depth)
+def get_next_states(game,player,depth):
 	""" generate all possible game states at depth ahead 
 	1. Notice, make sure return (game,node) """
+	next_states = []
+	for i in range(depth) :
+		get_next_states(game,player,1)
+	
+	
+def get_valid_nodes(game,player):
+	""" return the valid nodes for a player """
 	pass
 
