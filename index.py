@@ -200,12 +200,15 @@ class ComputerPlayer(Player):
   		
     	game_states = heuristic.get_next_states(game,self,1)
     	h = set()
-    	for game_state in game_states:
+    	
+        for game_state in game_states[1]:
     		for i in range(self.heuristics):
     			f += weight[i]*eval('f_'+str(i)+'(game_state[0], self)')
-    		h.add(game_state,f)
-    	next_node = max(h)[0][1]
-    	pass
+    		h.add((f, game_state))
+            
+    	next_node = max(h)[0][2]
+        return (next_node.x, next_node.y)
+    	
     	 
    
 
