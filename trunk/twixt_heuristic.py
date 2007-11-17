@@ -10,6 +10,7 @@ def f_1(game, player):
 	return total / (game.size[0] * game.size[1])
 
 def f_2(game, player):
+	""" Return the difference between player's f_1 and the opponent's f_1. """
 	return f_1(game, player) - f_1(game, game.player2)
 
 def f_3(game, player):
@@ -66,9 +67,11 @@ def f_5(game, player):
 
 
 def f_6(game, player):
+	""" Return the reciprocal of player's f_4. """
 	return 1 / f_4(game, player)
 
 def f_7(game, player):
+	""" Return the reciprocal of player's f_5. """
 	return 1 / f_5(game, player)
 
 def f_8(game, player):
