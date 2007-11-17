@@ -11,6 +11,9 @@ class TwixtError(Exception):
 class NodeError(TwixtError):
     pass
 
+class ConnectionError(TwixtError):
+    pass
+
 class Node(object):
     """
     This class represents a single node.
@@ -36,8 +39,8 @@ class Node(object):
         self.connected_nodes = set() # node's reference to adjacent nodes.
                                     # ie. nodes to which this node is
                                     # connected
-    def __hash__(self):
-      return hash((self.x, self.y, self.owner, self.connected_nodes))
+    #def __hash__(self):
+    #  return hash((self.x, self.y))
 
 class Connection(object):
     """
@@ -99,6 +102,7 @@ class Twixt(object):
         self.player2 = player2
         self.size = size
         self.nodes = {}
+        self.can_cross_self = True
         # set up all nodes.
         # notice: coords is a "generator comprehension".  this is like a
         # list comprehension except that each element is only created as it
@@ -118,13 +122,26 @@ class Twixt(object):
     def __hash__(self):
       return hash(self.nodes)
     
-    def claim_node(self, (x,y), player):
+    def claim_node(self, (x,y), player, auto_connect=True):
         """ Give ownership of the node at `(x,y)` to `player`. """
         if self.nodes[x,y].owner:
             raise NodeError("The node at x,y is already owned.")
         if not self.nodes[x,y].reservee in [player, ""]:
             raise NodeError("This node is reserved.")
         self.nodes[x,y].owner = player
+        if auto_connect == True:
+            differentials = [(1,2), (1,-2), (-1,2), (-1,-2),
+                             (2,1), (-2,1), (2,-1), (-2,-1)]
+            for dx,dy in differentials:
+                try:
+                    self.nodes[x+dx, y+dy]
+                except KeyError:
+                    continue
+                if self.nodes[x+dx,y+dy].owner == player:
+                    try:
+                        self.connect((x+dx, y+dy), (x,y), player)
+                    except ConnectionError:
+                        pass
     
     def connect(self, (x0,y0), (x1,y1), player):
         """
@@ -140,15 +157,17 @@ class Twixt(object):
         """
         node0 = self.nodes[x0,y0]
         node1 = self.nodes[x1,y1]
-        if not (player is node0.owner and player is node1.owner):
-            raise NodeError("Player does not own both nodes.")
+        if not (player == node0.owner and player == node1.owner):
+            raise ConnectionError("Player does not own both nodes.")
         xdif, ydif = abs(node0.x - node1.x), abs(node0.y - node1.y)
         if (xdif != 1 or ydif != 2) and (ydif != 1 or xdif != 2):
-            raise NodeError("Nodes are not a knight's move apart.")
+            raise ConnectionError("Nodes are not a knight's move apart.")
         conn = Connection(node0, node1)
-        for other_conn in self.connections:
+        for other_conn in self.connections():
+            if self.can_cross_self and other_conn.p0.owner == player:
+                continue
             if intersects(conn, other_conn):
-                raise NodeError("Connection would be intersected by " \
+                raise ConnectionError("Connection would be intersected by " \
                                 "another connection.")
         node0.connected_nodes.add(node1)
         node1.connected_nodes.add(node0)
@@ -157,7 +176,7 @@ class Twixt(object):
         """ Disconnect node at `(x0,y0)` from node at `(x1,y1)` """
         node0 = self.nodes[x0,y0]
         node1 = self.nodes[x1,y1]
-        if not (player is node0.owner is node1.owner):
+        if not (player == node0.owner == node1.owner):
             raise NodeError("Player does not own both nodes.")
         if not (node0 in node1.connected_nodes and \
                 node1 in node0.connected_nodes):
@@ -178,27 +197,27 @@ class Twixt(object):
         Iterates over the nodes owned by `player` at `area` where `area`
         is either 'start' or 'finish'.
         """
+        if player == self.player1:
+            side = 0
+        elif player == self.player2:
+            side = 1
         if area == "start":
             m = 0
         elif area == "finish":
-            if player is self.player1:
-                side = 0
-            elif player is self.player2:
-                side = 1
             m = self.size[side]-1
-        if player is self.player1:
-            node = lambda n: m, n
-        elif player is self.player2:
-            node = lambda n: n, m
+        if player == self.player1:
+            node = lambda x: (m, x)
+        elif player == self.player2:
+            node = lambda x: (x, m)
         for n in range(1,self.size[not side]-1):
-            if self.nodes[node(n)].owner is player:
+            if self.nodes[node(n)].owner == player:
                 yield self.nodes[node(n)]
     
-    @property
+    
     def connections(self, player=None):
         marked = set()
         for node in self.nodes.itervalues():
-            if not (player is None or node.owner == player):
+            if not (player == None or node.owner == player):
                 continue
             marked.add(node)
             for other_node in node.connected_nodes:
@@ -239,9 +258,9 @@ class Twixt(object):
                cross the new connection.
         """
         player = node0.owner
-        if ((player is node1.owner) or (not node1.owner)):
+        if ((player == node1.owner) or (not node1.owner)):
             conn = Connection(node0, node1)
-            for other_conn in self.connections:
+            for other_conn in self.connections():
                 if intersects(conn, other_conn):
                     return false
         else:
