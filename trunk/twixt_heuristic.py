@@ -91,3 +91,9 @@ def f_8(game, player):
 								ext_bridges += 1
 	
 	return ext_bridges		
+	
+	
+def get_next_states(game,player,depth)
+	""" generate all possible game states at depth ahead 
+	1. Notice, make sure return (game,node) """
+	pass
