@@ -1,6 +1,7 @@
 # coding: utf-8
 
 import os, cPickle, sys
+import re
 import sha
 import web
 from pytwixt import node_twixt as twixt
@@ -148,27 +149,27 @@ class Player(object):
   def __hash__(self):
       return hash(self.name)
 
-class HumanPlayer(Player):
-  
-  def __init__(self, name, secret):
-    self.name   = name
-    self.secret = sha.sha(secret).hexdigest()
-  
   def save(self):
-    f = open("state/player_%s" % sha.sha(self.name).hexdigest(), 'w')
+    f = open("state/player_%s" % re.escape(self.name), 'w')
     cPickle.dump(self, f)
     f.close()
     return self
-  
+
   @staticmethod
   def load(name):
-    fname = "state/player_%s" % sha.sha(name).hexdigest()
+    fname = "state/player_%s" % re.escape(name)
     if os.path.exists(fname):
       f = open(fname)
       p = cPickle.load(f)
       return p
     else:
       raise PlayerExistsException("No such player exists.")
+
+class HumanPlayer(Player):
+  
+  def __init__(self, name, secret):
+    self.name   = name
+    self.secret = sha.sha(secret).hexdigest()
   
   @staticmethod
   def login(name, secret):
@@ -187,7 +188,7 @@ class HumanPlayer(Player):
 
 class ComputerPlayer(Player):
     
-    def __init__(self, name, weights=None):
+    def __init__(self, name, weights=None, learning_rate=0):
             self.name = name
             self.heuristics = 8
             self.weights = [1./self.heuristics]*self.heuristics if not weights else weights
@@ -221,7 +222,10 @@ class LanfrancosComputerPlayer(ComputerPlayer):
   pass
 
 class AlexsComputerPlayer(ComputerPlayer):
-  pass
+    def __init__(self, name, weights=None, learning_rate=0):
+            self.name = name
+            self.heuristics = 8
+            self.weights = [1./self.heuristics]*self.heuristics if not weights else weights
 
 ## url handlers
 

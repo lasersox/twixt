@@ -11,7 +11,7 @@ c2 = ComputerPlayer("thanh")
 players = {"muzi": c1, "thanh":c2}
 
 turn_number = 0
-game.current_player = game.player2
+game.current_player = game.player1
 while True:
 
     xy = players[game.current_player].next_move(game)
