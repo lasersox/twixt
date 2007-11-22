@@ -6,6 +6,8 @@ import sha
 import web
 from pytwixt import node_twixt as twixt
 import twixt_heuristic as heuristic
+
+sys.stdout.sync = True
 # console = open("/dev/console", "w")
 
 render = web.template.render('templates/', cache=False)
@@ -188,11 +190,12 @@ class HumanPlayer(Player):
 
 class ComputerPlayer(Player):
     
-    def __init__(self, name, weights=None, learning_rate=0):
-            self.name = name
-            self.heuristics = 8
-            self.weights = [1./self.heuristics]*self.heuristics if not weights else weights
-            self.depth = 2
+    def __init__(self, name, weights=None, search_depth=2, learning_rate=0.05):
+        self.name = name
+        self.heuristics = 8
+        self.learning_rate = learning_rate
+        self.weights = [1./self.heuristics]*self.heuristics if not weights else weights
+        self.depth = search_depth
             
     def next_move(self, game):
         """ Just looking at one step ahead for now 
@@ -204,7 +207,7 @@ class ComputerPlayer(Player):
         h = []
         
         for game_state in game_states[1]:
-            h.append((get_score(game_state), game_state))
+            h.append((self.get_score(game_state), game_state))
             
         next_node = max(h)[1][2]
         return (next_node.x, next_node.y)
@@ -215,50 +218,58 @@ class ComputerPlayer(Player):
         2. Evaluate h = w1*f1 + w2*f2 + w3*f3...
         3. Pick the best one (greedy breadth first search) """
         
-        game_states = heuristic.get_next_states(game,self.name,self.depth)
-        
-        next_score, next_game = minimax_search(game_states, self.depth)
+        import copy
+        #print "Getting next states..."
+        game_states = heuristic.get_next_states(copy.deepcopy(game),2)
+        #print "Searching..."
+        next_score, next_game = self.minimax_search(game_states, self.depth)
+        #print next_score, next_game
         next_node = next_game[2]
+        #print "Found %s." % str((next_node.x, next_node.y))
         return (next_node.x, next_node.y)
     
     def get_score(self, game_state):
+        import math
         f = 0
         for i in range(1,self.heuristics+1):
-            f += self.weights[i-1]*eval('heuristic.f_'+str(i)+'(game_state[0], self)')
+            f += self.weights[i-1]*eval('heuristic.f_'+str(i)+'(game_state, self)')
+
+        return math.tanh(f)
             
     def minimax_search(self, node, depth):
         
         #if this is a leaf node or having no children,
         # just simply return the score
         if node[1] == [] or depth == 0:
-            return get_score(node[0]), node
+            #print self.get_score(node[0]), node
+            return self.get_score(node[0]), node
         
         #Opponent's move, try to minimize the score because that 
         # is what the apponent wants to do
-        if node[0].player != self.name:
+        if node[0].current_player != self.name:
             min_score = float(sys.maxint)
             min_node = []
             for child in node[1]:
-                temp_score, temp_node = minimax_search(child, depth-1)
+                temp_score, temp_node = self.minimax_search(child, depth-1)
                 if min_score > temp_score:
-                   min_score, min_node = temp_score, temp_node
+                   min_score, min_node = temp_score, child
                     
             return min_score, min_node
  
         # If this is our move, we would like to maximize our score
-        if node[0].player == self.name:
+        if node[0].current_player == self.name:
              max_score = float(-sys.maxint)
              max_node = []
              for child in node[1]:
-                 temp_score, temp_node = minimax_search(child, depth-1)
+                 temp_score, temp_node = self.minimax_search(child, depth-1)
+                 #print temp_score, temp_node
                  if max_score < temp_score:
                      max_score = temp_score
-                     max_node = temp_node
-                 
-             return max_score, max_node 
+                     max_node = child
+             return max_score, child
          
 
-    def update_weights(desired_score, actual_score, f_scores):
+    def update_weights(self, desired_score, actual_score, f_scores):
         """ Compare the difference between the predicted game state
         and the current game state and update the weights.
         The update formula is: 
@@ -266,7 +277,7 @@ class ComputerPlayer(Player):
         new_weight = current_weight + n*(desire_score - actual_score)*f_score
         """
         for i in range(len(self.weights)):
-            self.weights[i] = self.weights[i] + self.learn_rate*(desired_score - actual_score)*f_scores[i]     
+            self.weights[i] = self.weights[i] + self.learning_rate*(desired_score - actual_score)*f_scores[i]     
 
 
 

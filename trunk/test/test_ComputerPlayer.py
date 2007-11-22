@@ -14,7 +14,8 @@ turn_number = 0
 game.current_player = game.player1
 while True:
 
-    xy = players[game.current_player].next_move(game)
+    xy = players[game.current_player].next_minmax_move(game)
+    print "Player %s claimed node %s." % (game.current_player, xy)
     game.claim_node(xy, game.current_player)
     
     game.id = "test_cp_%i" % turn_number
@@ -22,7 +23,7 @@ while True:
     turn_number += 1
 
     if game.has_won(game.current_player):
-        #print "%s HAS WON THE GAME!\n" % game.current_player
+        print "%s HAS WON THE GAME!\n" % game.current_player
         break
     else:
         game.current_player = game.opponent(game.current_player)
