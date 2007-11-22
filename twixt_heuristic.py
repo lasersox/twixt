@@ -12,7 +12,7 @@ def f_1(game, player):
 
 def f_2(game, player):
     """ Return the difference between player's f_1 and the opponent's f_1. """
-    return f_1(game, player) - f_1(game, game.player2)
+    return f_1(game, player) - f_1(game, game.opponent(player))
 
 def f_3(game, player):
     """ checking for longest bridge """
@@ -95,28 +95,32 @@ def f_8(game, player):
     return float(4*ext_bridges/(game.size[0]*game.size[1]))    
     
     
-def get_next_states(game,player,depth):
+def get_next_states(game, depth):
     """ generate all possible game states at depth ahead 
     1. Notice, make sure return (game,node) 
     Comment: Using array to store the tree: A node will be an array of [[Current],[Childrent],Move, score]"""
-    parent = [game, [], None, None]
-    parent = get_next_recur_states(parent, player, depth)
+    parent = [game, [], None]
+    #print "calling get_next_recur_states with (%s, %s)." % (parent, depth)
+    parent = get_next_recur_states(parent, depth)
     return parent      
 
-def get_next_recur_states(parent, player, depth):
+def get_next_recur_states(parent, depth):
     """ Using recursion to generate next states recursively 
     Note: a node is [game, chidren, move]"""
     
     # get all the valid nodes for this player
     # This is the leaf node
     if depth == 1:  
-        valid_nodes = get_valid_nodes(parent[0],player)
+        valid_nodes = get_valid_nodes(parent[0])
+        #print "Current_player: " + parent[0].current_player
+        #for node in valid_nodes: print "  " + node.reservee + " %i, %i" % (node.x, node.y)
         for valid_node in valid_nodes:
             # get a copy the current game board
             temp_game = copy.deepcopy(parent[0])
             # claim the avalaible node
             try:
-                temp_game.claim_node((valid_node.x, valid_node.y), player)
+                temp_game.claim_node((valid_node.x, valid_node.y), temp_game.current_player)
+                temp_game.current_player = temp_game.opponent(temp_game.current_player)
             except twixt.NodeError, e:
                 print player, valid_node.reservee
                 raise e
@@ -124,32 +128,26 @@ def get_next_recur_states(parent, player, depth):
             parent[1].append([temp_game,[],valid_node])    
     else: #if not leaf, call recursively
         # determine which player is in turn
-        valid_nodes = get_valid_nodes(parent[0], player)
+        valid_nodes = get_valid_nodes(parent[0])
         for valid_node in valid_nodes:
             # get a copy the current game board
             temp_game = copy.deepcopy(parent[0])
             # claim the avalaible node
             try:
-                temp_game.claim_node((valid_node.x, valid_node.y), player)
+                temp_game.claim_node((valid_node.x, valid_node.y), temp_game.current_player)
+                temp_game.current_player = temp_game.opponent(temp_game.current_player)
             except twixt.NodeError, e:
                 print player, valid_node.reservee
                 raise e
-            temp_states = get_next_recur_states([temp_game, [], valid_node], parent[0].opponent(player), depth-1)
+            temp_states = get_next_recur_states([temp_game, [], valid_node], depth-1)
             parent[1].append(temp_states) 
     return parent
 
-def get_next_loo_states(parent, player, depth):
-    for i in range(depth):
-       
-       pass
-        
-def get_valid_nodes(game,player):
+def get_valid_nodes(game):
     """ return the valid nodes for a player """
     valid_nodes = set()
     for node in game.nodes.itervalues():
-        if node.reservee == game.opponent(player):
-            continue
-        if node.owner == "" and node.reservee != game.opponent(player):
+        if node.owner == "" and node.reservee in [game.current_player, ""]:
             valid_nodes.add(node)
     return valid_nodes
 
