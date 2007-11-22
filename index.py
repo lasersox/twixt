@@ -192,6 +192,7 @@ class ComputerPlayer(Player):
             self.name = name
             self.heuristics = 8
             self.weights = [1./self.heuristics]*self.heuristics if not weights else weights
+            self.depth = 3
             
     def next_move(self, game):
         """ Just looking at one step ahead for now 
@@ -203,13 +204,69 @@ class ComputerPlayer(Player):
         h = []
         
         for game_state in game_states[1]:
-            f = 0
-            for i in range(1,self.heuristics+1):
-                f += self.weights[i-1]*eval('heuristic.f_'+str(i)+'(game_state[0], self)')
-            h.append((f, game_state))
+            h.append((get_score(game_state), game_state))
             
         next_node = max(h)[1][2]
         return (next_node.x, next_node.y)
+
+    def next_minmax_move(self, game):
+        """ Just looking at one step ahead for now 
+        1. Generate all possible game states
+        2. Evaluate h = w1*f1 + w2*f2 + w3*f3...
+        3. Pick the best one (greedy breadth first search) """
+        
+        game_states = heuristic.get_next_states(game,self.name,self.depth)
+        next_score, next_game = minimax_search(game_states, self.depth)
+        next_node = next_game[2]
+        return (next_node.x, next_node.y)
+    
+    def get_score(self, game_state):
+        f = 0
+        for i in range(1,self.heuristics+1):
+            f += self.weights[i-1]*eval('heuristic.f_'+str(i)+'(game_state[0], self)')
+            
+    def minimax_search(self, node, depth):
+        
+        #if this is a leaf node or having no children,
+        # just simply return the score
+        if node[1] == [] or depth == self.depth:
+            return get_score(node[0]), node
+        
+        #Opponent's move, try to minimize the score because that 
+        # is what the apponent wants to do
+        if node[0].player != self.name:
+            min_score = float(sys.maxint)
+            min_node = []
+            for child in node[1]:
+                temp_score, temp_node = minimax_search(child, depth+1)
+                if min_score > temp_score:
+                   min_score, min_node = temp_score, temp_node
+                    
+            return min_score, min_node
+ 
+        # If this is our move, we would like to maximize our score
+        if node[0].player == self.name:
+             max_score = float(-sys.maxint)
+             max_node = []
+             for child in node[1]:
+                 temp_score, temp_node = minimax_search(child, depth+1)
+                 if max_score < temp_score:
+                     max_score = temp_score
+                     max_node = temp_node
+                 
+             return max_score, max_node 
+         
+
+    def update_weights(desired_score, actual_score, f_scores):
+        """ Compare the difference between the predicted game state
+        and the current game state and update the weights.
+        The update formula is: 
+        
+        new_weight = current_weight + n*(desire_score - actual_score)*f_score
+        """
+        for i in range(len(self.weights)):
+            self.weights[i] = self.weights[i] + self.learn_rate*(desired_score - actual_score)*f_scores[i]     
+
 
 
 class ThanhsComputerPlayer(ComputerPlayer):

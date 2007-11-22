@@ -98,8 +98,8 @@ def f_8(game, player):
 def get_next_states(game,player,depth):
     """ generate all possible game states at depth ahead 
     1. Notice, make sure return (game,node) 
-    Comment: Using array to store the tree: A node will be an array of [[Current],[Childrent],[Move]]"""
-    parent = [game, [], None]
+    Comment: Using array to store the tree: A node will be an array of [[Current],[Childrent],Move, score]"""
+    parent = [game, [], None, None]
     parent = get_next_recur_states(parent, player, depth)
     return parent      
 
@@ -136,7 +136,6 @@ def get_next_recur_states(parent, player, depth):
                 raise e
             temp_states = get_next_recur_states([temp_game, [], valid_node], parent[0].opponent(player), depth-1)
             parent[1].append(temp_states) 
-    
     return parent
 
 def get_next_loo_states(parent, player, depth):
