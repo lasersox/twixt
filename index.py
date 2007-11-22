@@ -216,6 +216,7 @@ class ComputerPlayer(Player):
         3. Pick the best one (greedy breadth first search) """
         
         game_states = heuristic.get_next_states(game,self.name,self.depth)
+        
         next_score, next_game = minimax_search(game_states, self.depth)
         next_node = next_game[2]
         return (next_node.x, next_node.y)
