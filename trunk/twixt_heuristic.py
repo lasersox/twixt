@@ -52,7 +52,7 @@ def f_4(game, player):
         vnodes[bridge.p1.y] = 1
         vnodes[int(round((bridge.p0.y + bridge.p1.y)/2))] = 1
     
-    return float(sum(vnodes)/(game.size[0]*game.size[1]))
+    return float(sum(vnodes)/(game.size[1]))
 
 
 def f_5(game, player):
@@ -66,7 +66,7 @@ def f_5(game, player):
         hnodes[bridge.p1.x] = 1
         hnodes[int(round((bridge.p0.x + bridge.p1.x)/2))] = 1
     
-    return float(sum(hnodes)/(game.size[0]*game.size[1]))
+    return float(sum(hnodes)/(game.size[0]))
 
 
 def f_6(game, player):
@@ -92,7 +92,7 @@ def f_8(game, player):
                         for other_conn in game.connections(game.opponent(player)):
                             if twixt.intersects(conn, other_conn) == False:
                                 ext_bridges += 1
-    return ext_bridges      
+    return float(4*ext_bridges/(game.size[0]*game.size[1]))    
     
     
 def get_next_states(game,player,depth):
