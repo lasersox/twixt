@@ -7,7 +7,7 @@ sys.path.append(os.getcwd())
 from pytwixt import node_twixt as twixt
 from index import render_game_board_image, ComputerPlayer
 
-game = twixt.Twixt("muzi", "thanh", (10, 10))
+game = twixt.Twixt("muzi", "thanh", (5, 5))
 
 c1 = ComputerPlayer("muzi")
 c2 = ComputerPlayer("thanh")
@@ -31,6 +31,6 @@ while True:
     else:
         game.current_player = game.opponent(game.current_player)
     
-
+render_game_board_image(game)
 
 
