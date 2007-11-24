@@ -51,7 +51,9 @@ def f_3(game, player):
     return float(float(max(conn_bridges))/(game.size[0]*game.size[1]))
 
 def f_4(game, player):
-    """ looping through all the bridges and project it to the vertical axis """
+    """ looping through all the bridges and project it to the goal axis """
+    if game.player1 == player: axis = 0
+    else: axis = 1
     distance = 0
     vnodes = [0]*game.size[0]
     bridges = game.connections(player)
@@ -65,9 +67,11 @@ def f_4(game, player):
 
 
 def f_5(game, player):
-    """ looping through all the bridges and project it to the vertical axis """
+    """ looping through all the bridges and project it to the opponent's goal axis """
+    if game.player1 == player: axis = 1
+    else: axis = 0
     distance = 0
-    hnodes = [0]*game.size[1]
+    hnodes = [0]*game.size[axis]
     bridges = game.connections(player)
     
     for bridge in bridges:
@@ -125,7 +129,12 @@ def f_10(game, player):
     else:    
         return 0
 
-    
+def g_1(game, player):
+    return f_4(game, player) - f_4(game, game.opponent(player))
+
+fs = [f_1, f_2, f_3, f_4, f_5, f_6, f_7, f_8, f_9, f_10]
+gs = [g_1]
+
 def get_next_states(game, depth):
     """ generate all possible game states at depth ahead 
     1. Notice, make sure return (game,node) 

@@ -13,7 +13,7 @@ def random_weights(N_heuristics):
 def train(number_of_games=100, search_depth=2):
     
     assert search_depth % 2 == 0
-    weights = random_weights(10)
+    weights = random_weights(len(heuristic.fs))
     weights[8] = 1
     weights[9] = 1
     # print "Weights for the players: %s" % weights
@@ -26,11 +26,13 @@ def train(number_of_games=100, search_depth=2):
         # print "Game %i" % n
         score_buffer = []
         
-        game = twixt.Twixt(c1.name, c2.name, (5,5))
+        game = twixt.Twixt(c1.name, c2.name, (6,6))
         game.id = str(n)
         
+        game.claim_node((2,3), c1.name)
+        
         trainee, teacher = c1, c2
-        game.current_player = c1.name
+        game.current_player = c2.name
         
         while True:
             
@@ -51,7 +53,7 @@ def train(number_of_games=100, search_depth=2):
                 expected_score = score_buffer.pop(0)
                 actual_score = trainee.get_score(game)
                 score_buffer.append(actual_score)
-                effs = [eval('heuristic.f_'+str(i)+'(game, players[game.current_player])') for i in range(1,11)]
+                effs = [f_i(game, trainee.name) for f_i in heuristic.fs]
                 old_weights = copy.deepcopy(trainee.weights)
                 trainee.update_weights(expected_score, actual_score, effs)
                 # print [old_weights[i] - trainee.weights[i] for i in range(len(trainee.weights))]
@@ -60,7 +62,7 @@ def train(number_of_games=100, search_depth=2):
                 score_buffer.append(actual_score)
             
             if game.has_won(game.current_player):
-                print "%s HAS WON THE GAME!\n" % game.current_player
+                print "%s HAS WON THE GAME!" % game.current_player
                 break
             else:
                 game.current_player = game.opponent(game.current_player)
