@@ -81,6 +81,35 @@ class NN:
 
         return self.ao[:]
 
+    def score(self, inputs):
+        if len(inputs) != self.ni-1:
+            raise ValueError, 'wrong number of inputs'
+        
+        ai = [1.0]*self.ni
+        ah = [1.0]*self.nh
+        ao = [1.0]*self.no
+        
+        # input activations
+        for i in range(self.ni-1):
+            #self.ai[i] = sigmoid(inputs[i])
+            ai[i] = inputs[i]
+
+        # hidden activations
+        for j in range(self.nh):
+            sum = 0.0
+            for i in range(self.ni):
+                sum = sum + ai[i] * self.wi[i][j]
+            ah[j] = sigmoid(sum)
+
+        # output activations
+        for k in range(self.no):
+            sum = 0.0
+            for j in range(self.nh):
+                sum = sum + ah[j] * self.wo[j][k]
+            ao[k] = sigmoid(sum)
+
+        return ao[:]
+
 
     def backPropagate(self, targets, N, M):
         if len(targets) != self.no:

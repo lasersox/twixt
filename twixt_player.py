@@ -148,7 +148,8 @@ class ComputerPlayer(Player):
         """
         for i in range(len(self.weights)):
             self.weights[i] = self.weights[i] + self.learning_rate*(expected_score - actual_score)*f_scores[i]     
-
+        return 0
+        
 
 class ComputerPlayer_HiddenNodes(ComputerPlayer):
     
@@ -157,19 +158,18 @@ class ComputerPlayer_HiddenNodes(ComputerPlayer):
         self.depth = search_depth
         self.net = NN(len(heuristic.fs) + len(heuristic.gs), 2, 1)
         self.inputs_buffer = []
-        self.N = 0.5
-        self.M = 0.1
+        self.N = 0.05
+        self.M = 0.01
     
     def get_score(self, game_state):
         import math
         effs = [f_i(game_state, self.name) for f_i in heuristic.fs]
         gees = [heuristic.g_1(game_state, self.name)]
-        inputs = effs.append(gees[0])
+        inputs = effs + gees
         self.inputs_buffer.append(inputs)
-        print repr(inputs)
-        output = self.net.update(inputs)
+        output = self.net.score(inputs)
         return output
-        # return 1 * n1 + 0.5 * heuristic.g_0(game_state, self.name)
+        return output + 1. * heuristic.g_0(game_state, self.name)
     
     def update_weights(self, expected_score, actual_score, f_scores):
         """ Compare the difference between the predicted game state
@@ -179,7 +179,7 @@ class ComputerPlayer_HiddenNodes(ComputerPlayer):
         new_weight = current_weight + n*(desire_score - actual_score)*f_score
         """
         self.net.update(self.inputs_buffer.pop(0))
-        return self.net.backPropogate([actual_score], self.N, self.M)
+        return self.net.backPropagate(actual_score, self.N, self.M)
 
 
 
