@@ -192,9 +192,8 @@ class ComputerPlayer(Player):
     
     def __init__(self, name, weights=None, search_depth=2, learning_rate=0.05):
         self.name = name
-        self.heuristics = 10
         self.learning_rate = learning_rate
-        self.weights = [1./self.heuristics]*self.heuristics if not weights else weights
+        self.weights = [1./len(heuristic.fs)]*len(heuristic.fs) if not weights else weights
         self.depth = search_depth
             
     def next_move(self, game):
@@ -230,11 +229,9 @@ class ComputerPlayer(Player):
     
     def get_score(self, game_state):
         import math
-        f = 0
-        for i in range(1,self.heuristics+1):
-            f += self.weights[i-1]*eval('heuristic.f_'+str(i)+'(game_state, self)')
-
-        return math.tanh(f)
+        f = sum(self.weights[i]*f_i(game_state, self.name) for i, f_i in enumerate(heuristic.fs))
+        n1 = math.tanh(0.5*f)
+        return 1 * n1 + 0.5 * heuristic.g_1(game_state, self.name)
             
     def minimax_search(self, node, depth):
         
