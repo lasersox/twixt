@@ -219,7 +219,7 @@ class ComputerPlayer(Player):
         
         import copy
         #print "Getting next states..."
-        game_states = heuristic.get_next_states(copy.deepcopy(game),2)
+        game_states = heuristic.get_next_states(copy.deepcopy(game),self.depth)
         #print "Searching..."
         next_score, next_game = self.minimax_search(game_states, self.depth)
         #print next_score, next_game
