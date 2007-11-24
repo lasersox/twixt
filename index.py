@@ -274,7 +274,8 @@ class ComputerPlayer(Player):
         new_weight = current_weight + n*(desire_score - actual_score)*f_score
         """
         for i in range(len(self.weights)):
-            self.weights[i] = self.weights[i] + self.learning_rate*(desired_score - actual_score)*f_scores[i]     
+            if i != 8 or i != 9:
+                self.weights[i] = self.weights[i] + self.learning_rate*(desired_score - actual_score)*f_scores[i]     
 
 
 
