@@ -86,4 +86,4 @@ def train(number_of_games=100, search_depth=2):
     c2.save()
 
 if __name__ == "__main__":
-    train(number_of_games=40, search_depth=2)
+    train(number_of_games=1000, search_depth=2)
