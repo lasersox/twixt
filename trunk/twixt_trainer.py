@@ -13,7 +13,9 @@ def random_weights(N_heuristics):
 def train(number_of_games=100, search_depth=2):
     
     assert search_depth % 2 == 0
-    weights = random_weights(8)
+    weights = random_weights(10)
+    weights[8] = 1
+    weights[9] = 1
     # print "Weights for the players: %s" % weights
     c1 = ComputerPlayer("muzi", weights, search_depth = 2, learning_rate=0.09)
     c2 = ComputerPlayer("thanh", copy.deepcopy(weights), search_depth = 2, learning_rate=0.04)
@@ -49,7 +51,7 @@ def train(number_of_games=100, search_depth=2):
                 expected_score = score_buffer.pop(0)
                 actual_score = trainee.get_score(game)
                 score_buffer.append(actual_score)
-                effs = [eval('heuristic.f_'+str(i)+'(game, players[game.current_player])') for i in range(1,9)]
+                effs = [eval('heuristic.f_'+str(i)+'(game, players[game.current_player])') for i in range(1,11)]
                 old_weights = copy.deepcopy(trainee.weights)
                 trainee.update_weights(expected_score, actual_score, effs)
                 # print [old_weights[i] - trainee.weights[i] for i in range(len(trainee.weights))]
@@ -58,7 +60,7 @@ def train(number_of_games=100, search_depth=2):
                 score_buffer.append(actual_score)
             
             if game.has_won(game.current_player):
-                # print "%s HAS WON THE GAME!\n" % game.current_player
+                print "%s HAS WON THE GAME!\n" % game.current_player
                 break
             else:
                 game.current_player = game.opponent(game.current_player)
@@ -71,4 +73,4 @@ def train(number_of_games=100, search_depth=2):
     c2.save()
 
 if __name__ == "__main__":
-    train(number_of_games=20, search_depth=2)
+    train(number_of_games=40, search_depth=2)
