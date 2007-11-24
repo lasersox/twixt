@@ -8,14 +8,14 @@ from pytwixt import node_twixt as twixt
 from index import render_game_board_image
 from twixt_heuristic import *
 
-g = twixt.Twixt("foo", "bar", (10, 10))
+g = twixt.Twixt("foo", "bar", (5, 5))
 g.id = "test"
 
+g.claim_node((0,1), 'foo')
+g.claim_node((3,3), 'bar')
 g.claim_node((2,2), 'foo')
-g.claim_node((4,3), 'bar')
-g.claim_node((3,4), 'foo')
-g.claim_node((6,2), 'bar')
-g.claim_node((2,6), 'foo')
+g.claim_node((2,3), 'bar')
+g.claim_node((4,1), 'foo')
 render_game_board_image(g)
 
 """ Test 1: Total bridge length """
@@ -69,6 +69,12 @@ print "Player %s:  extendable nodes %s." % ('bar', f_8(g,'bar'))
 #not pass
 # fixed bug : floating point operation
 
+""" Test 9 """
+print "Player %s:  winning %s." % ('foo', f_9(g,'foo'))
+print "Player %s:  winning %s." % ('bar', f_9(g,'bar'))
 
+""" Test 10 """
 
+print "Player %s:  loosing %s." % ('foo', f_10(g,'foo'))
+print "Player %s:  loosing %s." % ('bar', f_10(g,'bar'))
 
