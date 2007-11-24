@@ -132,7 +132,7 @@ def f_10(game, player):
 def g_1(game, player):
     return f_4(game, player) - f_4(game, game.opponent(player))
 
-fs = [f_1, f_2, f_3, f_4, f_5, f_6, f_7, f_8, f_9, f_10]
+fs = [f_1, f_2, f_3, f_4, f_5, f_6, f_7, f_8]
 gs = [g_1]
 
 def get_next_states(game, depth):
