@@ -1,6 +1,7 @@
 from math import *
 from pytwixt import node_twixt as twixt
 import copy
+import sys
 
 def f_1(game, player):
     """ Compute total length of bridges for player. """
@@ -19,16 +20,16 @@ def f_3(game, player):
     bridges = list(game.connections(player))
     conn_bridges = set()
     
-    print " bridges %s %s " % (bridges, len(bridges))
+    #print " bridges %s %s " % (bridges, len(bridges))
     for bridge in bridges:
-        print " bridge %s " % bridge
+        #print " bridge %s " % bridge
         conn_nodes = set()
         conn_nodes.add(bridge.p0)
         conn_nodes.add(bridge.p1)
         bridges.remove(bridge)
-        print "bridge length : %s "  % len(conn_nodes)
+        #print "bridge length : %s "  % len(conn_nodes)
         for bridge1 in bridges:
-            print " bridge1 %s " % bridge1
+            #print " bridge1 %s " % bridge1
             if bridge1.p0 in conn_nodes:
                 conn_nodes.add(bridge1.p1)
                 bridges.remove(bridge1)
@@ -38,12 +39,12 @@ def f_3(game, player):
                     conn_nodes.add(bridge1.p0)
                     bridges.remove(bridge1)
             
-            print "bridge length : %s "  % len(conn_nodes)
+            #print "bridge length : %s "  % len(conn_nodes)
             
         conn_bridges.add(len(conn_nodes)-1)
-        print "bridge length : %s "  % len(conn_nodes)
+        #print "bridge length : %s "  % len(conn_nodes)
     
-    print "bridge length : %s "  % conn_bridges
+    #print "bridge length : %s "  % conn_bridges
     """ checking for longest path """
     if not conn_bridges:
         return 0
@@ -105,15 +106,24 @@ def f_8(game, player):
 def f_9(game, player):
     """ Evaluate ability to win 
     The player should choose a move leading to a win without considering
-    other heuristics """
-    pass
+    other heuristics - return +inf basically """
+    
+    if game.has_won(player):
+        return sys.maxint
+    else:    
+        return 0
 
+    
 def f_10(game, player):
     """ Evaluate possibility to lose
     The player should choose a move that is not leading to a loose. In other words,
-    If the player is in loosing situation, he should prevent the opponent from winning"""
-    pass
-
+    If the player is in loosing situation, he should prevent the opponent from winning
+    Need to consider : maybe covered in the Minmax search already
+    """
+    if game.has_won(game.opponent(player)):
+        return -sys.maxint
+    else:    
+        return 0
 
     
 def get_next_states(game, depth):
