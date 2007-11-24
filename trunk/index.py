@@ -192,7 +192,7 @@ class ComputerPlayer(Player):
     
     def __init__(self, name, weights=None, search_depth=2, learning_rate=0.05):
         self.name = name
-        self.heuristics = 8
+        self.heuristics = 10
         self.learning_rate = learning_rate
         self.weights = [1./self.heuristics]*self.heuristics if not weights else weights
         self.depth = search_depth
