@@ -125,7 +125,7 @@ def f_10(game, player):
     Need to consider : maybe covered in the Minmax search already
     """
     if game.has_won(game.opponent(player)):
-        return -sys.maxint
+        return -sys.maxint/2
     else:    
         return 0
 
