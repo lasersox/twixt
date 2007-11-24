@@ -1,8 +1,10 @@
 import sys, os
 sys.path.append(os.getcwd())
+sys.path.append(os.chdir("../"))
+sys.path.append(os.getcwd())
 
 from pytwixt import node_twixt as twixt
-from index import render_game_board
+from index import render_game_board_image
 
 g = twixt.Twixt("foo", "bar", (10, 10))
 g.id = "test"
