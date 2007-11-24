@@ -19,27 +19,35 @@ def f_3(game, player):
     bridges = list(game.connections(player))
     conn_bridges = set()
     
+    print " bridges %s %s " % (bridges, len(bridges))
     for bridge in bridges:
+        print " bridge %s " % bridge
         conn_nodes = set()
         conn_nodes.add(bridge.p0)
         conn_nodes.add(bridge.p1)
         bridges.remove(bridge)
-         
+        print "bridge length : %s "  % len(conn_nodes)
         for bridge1 in bridges:
+            print " bridge1 %s " % bridge1
             if bridge1.p0 in conn_nodes:
-                conn_nodes.add(bridge.p1)
+                conn_nodes.add(bridge1.p1)
                 bridges.remove(bridge1)
                 
-            if bridge1.p1 in conn_nodes:
-                conn_nodes.add(bridge.p0)
-                bridges.remove(bridge1)
-                
+            else: 
+                if bridge1.p1 in conn_nodes:
+                    conn_nodes.add(bridge1.p0)
+                    bridges.remove(bridge1)
+            
+            print "bridge length : %s "  % len(conn_nodes)
+            
         conn_bridges.add(len(conn_nodes)-1)
-        
+        print "bridge length : %s "  % len(conn_nodes)
+    
+    print "bridge length : %s "  % conn_bridges
     """ checking for longest path """
     if not conn_bridges:
         return 0
-    return max(conn_bridges)/(game.size[0]*game.size[1])
+    return float(float(max(conn_bridges))/(game.size[0]*game.size[1]))
 
 def f_4(game, player):
     """ looping through all the bridges and project it to the vertical axis """
@@ -52,7 +60,7 @@ def f_4(game, player):
         vnodes[bridge.p1.y] = 1
         vnodes[int(round((bridge.p0.y + bridge.p1.y)/2))] = 1
     
-    return float(sum(vnodes)/(game.size[1]))
+    return float(float(sum(vnodes)-1)/(game.size[1]))
 
 
 def f_5(game, player):
@@ -66,7 +74,7 @@ def f_5(game, player):
         hnodes[bridge.p1.x] = 1
         hnodes[int(round((bridge.p0.x + bridge.p1.x)/2))] = 1
     
-    return float(sum(hnodes)/(game.size[0]))
+    return float(float(sum(hnodes)-1)/(game.size[0]))
 
 
 def f_6(game, player):
@@ -82,7 +90,7 @@ def f_8(game, player):
     ext_bridges = 0
 
     for node0 in game.nodes.itervalues():
-        if node0.owner == player.name:
+        if node0.owner == player:
             for node1 in game.nodes.itervalues():
                 if node1.owner == "" and node1.reservee != game.opponent(player):
                     xdif, ydif = abs(node0.x - node1.x), abs(node0.y - node1.y)
@@ -92,8 +100,21 @@ def f_8(game, player):
                         for other_conn in game.connections(game.opponent(player)):
                             if twixt.intersects(conn, other_conn) == False:
                                 ext_bridges += 1
-    return float(4*ext_bridges/(game.size[0]*game.size[1]))    
+    return float(float(4*ext_bridges)/(game.size[0]*game.size[1]))    
     
+def f_9(game, player):
+    """ Evaluate ability to win 
+    The player should choose a move leading to a win without considering
+    other heuristics """
+    pass
+
+def f_10(game, player):
+    """ Evaluate possibility to lose
+    The player should choose a move that is not leading to a loose. In other words,
+    If the player is in loosing situation, he should prevent the opponent from winning"""
+    pass
+
+
     
 def get_next_states(game, depth):
     """ generate all possible game states at depth ahead 
