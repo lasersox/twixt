@@ -117,14 +117,14 @@ def GameError(Exception):
   pass
 
 def load_game(game_id):
-  f = open("state/game_%s" % game_id)
+  f = open("state/game_%s.pickle" % game_id)
   g = cPickle.load(f)
   f.close()
   return g
 
 def save_game(game):
   try:
-    f = open("state/game_%s" % game.id, 'w')
+    f = open("state/game_%s.pickle" % game.id, 'w')
     cPickle.dump(game, f)
     f.close()
   except:
@@ -132,8 +132,8 @@ def save_game(game):
   del f
 
 def waiting_players():
-  if os.path.exists('state/waiting_players'):
-    f = open('state/waiting_players')
+  if os.path.exists('state/waiting_players.pickle'):
+    f = open('state/waiting_players.pickle')
     games = cPickle.load(f)
     f.close()
   else:
@@ -161,14 +161,14 @@ class Player(object):
       return hash(self.name)
 
   def save(self):
-    f = open("state/player_%s" % re.escape(self.name), 'w')
+    f = open("state/player_%s.pickle" % re.escape(self.name), 'w')
     cPickle.dump(self, f)
     f.close()
     return self
 
   @staticmethod
   def load(name):
-    fname = "state/player_%s" % re.escape(name)
+    fname = "state/player_%s.pickle" % re.escape(name)
     if os.path.exists(fname):
       f = open(fname)
       p = cPickle.load(f)
@@ -184,7 +184,7 @@ class HumanPlayer(Player):
   
   @staticmethod
   def login(name, secret):
-    fname = "state/player_%s" % sha.sha(name).hexdigest()
+    fname = "state/player_%s.pickle" % sha.sha(name).hexdigest()
     web.debug("Opening file %s..." % fname)
     if os.path.exists(fname):
       f = open(fname)
@@ -323,7 +323,7 @@ class new_game(object):
     games = waiting_players()
     games.add(p.name)
     try:
-      f = open('state/waiting_players', 'w')
+      f = open('state/waiting_players.pickle', 'w')
       cPickle.dump(games, f)
     except:
       f.close()
