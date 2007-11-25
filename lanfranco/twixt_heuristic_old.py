@@ -8,6 +8,8 @@ import sys
 NOTES:
 * All the modifications I introduced aim at having all the features work in the
 same direction: higher values if "good", lower values for "bad".
+* It is debatable whether f_1 and f_2 are "good" when high. I propose we
+replace them with 
 * f_4 should use index "axis" within square brackets, instead of 0
 * f_5 should return 1 - (what it returned before)
 * f_6 and f_7 should *not* be used: they work against our goal
@@ -61,7 +63,7 @@ def f_3(game, player):
     """ checking for longest path """
     if not conn_bridges:
         return 0
-    return float(max(conn_bridges))/(game.size[0]*game.size[1])
+    return float(float(max(conn_bridges))/(game.size[0]*game.size[1]))
 
 def f_4(game, player):
     """ looping through all the bridges and project it to the goal axis """
