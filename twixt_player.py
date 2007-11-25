@@ -147,9 +147,8 @@ class PerceptronComputerPlayer(ComputerPlayer):
     
     def get_score(self, game_state):
         import math
-        f = sum(self.weights[i]*f_i(game_state, self.name) for i, f_i in enumerate(heuristic.fs))
-        n1 = math.tanh(0.25*f)
-        return 1 * n1 # + 0.5 * heuristic.g_1(game_state, self.name)
+        perceptron = sum(self.weights[i]*f_i(game_state, self.name) for i, f_i in enumerate(heuristic.fs))
+        return math.tanh(0.25*perceptron) + 0.5 * heuristic.g_1(game_state, self.name)
     
     def update_weights(self, expected_score, actual_score, f_scores):
         """ Compare the difference between the predicted game state
