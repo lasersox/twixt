@@ -2,7 +2,7 @@ import sys
 
 from pytwixt import node_twixt as twixt
 import twixt_heuristic as heuristic
-from index import ComputerPlayer #, render_game_board_image
+from index import ComputerPlayer, render_game_board_image
 from random import random
 import copy
 
@@ -15,11 +15,13 @@ def random_weights(N_heuristics):
 def train(number_of_games=100, search_depth=2):
     
     assert search_depth % 2 == 0
-    weights = random_weights(len(heuristic.fs))
-    # weights[8] = 1
-    # weights[9] = 1
+    # weights = random_weights(len(heuristic.fs))
+    # weights = [0.80645065474968314, 0.73851632090876906, -0.018709876472095509, 0.067931480573086053, 0.341251139029706]
+    # weights = [0.78256345518575787, 0.72806061248232179, -0.047892301965649302, -0.0088772339336371277, 0.34506233417550852]
+    # weights = [0.77115418840969974, 0.71555104743300879, -0.00081140756190061988, -0.054876323944738327, 0.3665955789374965]
+    weights = [0.74288563817636388, 0.70486729316165075, 0.052725832294392469, -0.098542258526105236, 0.44418131498229901]
     # print "Weights for the players: %s" % weights
-    c1 = ComputerPlayer("muzi", weights, search_depth = 2, learning_rate=0.09)
+    c1 = ComputerPlayer("muzi", weights, search_depth = 2, learning_rate=0.1)
     c2 = ComputerPlayer("thanh", copy.deepcopy(weights), search_depth = 2, learning_rate=0.04)
     
     players = {"muzi": c1, "thanh":c2}
@@ -27,7 +29,7 @@ def train(number_of_games=100, search_depth=2):
     score_status = [0,0,0]
     
     for n in range(number_of_games):
-        # print "Game %i" % n
+
         score_buffer = []
         
         game = twixt.Twixt(c1.name, c2.name, (6,6))
@@ -61,7 +63,7 @@ def train(number_of_games=100, search_depth=2):
                 effs = [f_i(game, trainee.name) for f_i in heuristic.fs]
                 #old_weights = copy.deepcopy(trainee.weights)
                 error = trainee.update_weights(expected_score, actual_score, effs)
-                print "error: %f" % error
+                print "error: %r" % error
                 # print [old_weights[i] - trainee.weights[i] for i in range(len(trainee.weights))]
             elif trainee.name == game.current_player and len(score_buffer) != search_depth/2:
                 actual_score = trainee.get_score(game)
@@ -77,15 +79,15 @@ def train(number_of_games=100, search_depth=2):
             else:
                 game.current_player = game.opponent(game.current_player)
         
-        #render_game_board_image(game)
+        render_game_board_image(game)
         print "Game %s finished: Game status [Muzi,Thanh,Draw] = %s" % (n,score_status)
         if n%100 == 0:
             print "Trained weights: %s" % c1.weights
         del game
     
-    # print "Trained weights: %s" % c1.weights
+    print "Trained weights: %s" % c1.weights
     c1.save()
     c2.save()
 
 if __name__ == "__main__":
-    train(number_of_games=40, search_depth=2)
+    train(number_of_games=100, search_depth=2)

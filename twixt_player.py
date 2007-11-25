@@ -25,14 +25,14 @@ class Player(object):
       return hash(self.name)
 
   def save(self):
-    f = open("state/player_%s" % re.escape(self.name), 'w')
+    f = open("state/player_%s.pickle" % re.escape(self.name), 'w')
     cPickle.dump(self, f)
     f.close()
     return self
 
   @staticmethod
   def load(name):
-    fname = "state/player_%s" % re.escape(name)
+    fname = "state/player_%s.pickle" % re.escape(name)
     if os.path.exists(fname):
       f = open(fname)
       p = cPickle.load(f)
@@ -48,7 +48,7 @@ class HumanPlayer(Player):
   
   @staticmethod
   def login(name, secret):
-    fname = "state/player_%s" % sha.sha(name).hexdigest()
+    fname = "state/player_%s.pickle" % sha.sha(name).hexdigest()
     web.debug("Opening file %s..." % fname)
     if os.path.exists(fname):
       f = open(fname)
@@ -92,7 +92,7 @@ class ComputerPlayer(Player):
         
         import copy
         #print "Getting next states..."
-        game_states = heuristic.get_next_states(copy.deepcopy(game),2)
+        game_states = heuristic.get_next_states(copy.deepcopy(game),self.depth)
         #print "Searching..."
         next_score, next_game = self.minimax_search(game_states, self.depth)
         #print next_score, next_game
@@ -112,7 +112,11 @@ class ComputerPlayer(Player):
         # just simply return the score
         if node[1] == [] or depth == 0:
             #print self.get_score(node[0]), node
-            return self.get_score(node[0]), node
+            game = node[0]
+            score = self.get_score(node[0])
+            game.id = "depth %s %r %r %s %f" % (depth, sorted(list(game.claimed_nodes())), node[2], self.name, score)
+            #render_game_board_image(game)
+            return score, node
         
         #Opponent's move, try to minimize the score because that 
         # is what the apponent wants to do
@@ -123,20 +127,27 @@ class ComputerPlayer(Player):
                 temp_score, temp_node = self.minimax_search(child, depth-1)
                 if min_score > temp_score:
                    min_score, min_node = temp_score, child
-                    
+            game = node[0]
+            score = self.get_score(node[0])
+            game.id = "depth %s %r %r %f" % (depth, sorted(list(game.claimed_nodes())), node[2], score)
+            #render_game_board_image(game)
             return min_score, min_node
  
         # If this is our move, we would like to maximize our score
         if node[0].current_player == self.name:
-             max_score = float(-sys.maxint)
-             max_node = []
-             for child in node[1]:
-                 temp_score, temp_node = self.minimax_search(child, depth-1)
-                 #print temp_score, temp_node
-                 if max_score < temp_score:
-                     max_score = temp_score
-                     max_node = child
-             return max_score, child
+            max_score = float(-sys.maxint)
+            max_node = []
+            for child in node[1]:
+                temp_score, temp_node = self.minimax_search(child, depth-1)
+                #print temp_score, temp_node
+                if max_score < temp_score:
+                    max_score = temp_score
+                    max_node = child
+            game = node[0]
+            score = self.get_score(node[0])
+            game.id = "depth %s %r %r %f" % (depth, sorted(list(game.claimed_nodes())), node[2], score)
+            #render_game_board_image(game)
+            return max_score, max_node
          
 
     def update_weights(self, expected_score, actual_score, f_scores):

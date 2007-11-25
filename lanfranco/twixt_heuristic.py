@@ -61,7 +61,7 @@ def f_3(game, player):
     """ checking for longest path """
     if not conn_bridges:
         return 0
-    return float(float(max(conn_bridges))/(game.size[0]*game.size[1]))
+    return float(max(conn_bridges))/(game.size[0]*game.size[1])
 
 def f_4(game, player):
     """ looping through all the bridges and project it to the goal axis """
