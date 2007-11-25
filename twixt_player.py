@@ -61,7 +61,7 @@ class HumanPlayer(Player):
     else:
       return HumanPlayer(name, secret).save()
 
-class ComputerPlayer(object):
+class ComputerPlayer(Player):
     
     def next_move(self, game):
         """ Just looking at one step ahead for now 
