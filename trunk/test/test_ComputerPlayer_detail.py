@@ -1,6 +1,7 @@
 import sys, os
 
-sys.path.append(os.chdir("../"))
+#sys.path.append(os.chdir("../"))
+sys.path.append("./")
 sys.path.append(os.getcwd())
 
 

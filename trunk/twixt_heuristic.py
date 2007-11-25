@@ -73,11 +73,14 @@ def f_4(game, player):
 
 def f_5(game, player):
     """ looping through all the bridges and project it to the opponent's goal axis """
+    
     if game.player1 == player:
         edge = lambda node: node.y
-        axis = 0
+        axis = 1
     else:
         edge = lambda node: node.x
+        axis = 0
+    
     distance = 0
     hnodes = [0]*game.size[axis]
     bridges = game.connections(player)
@@ -90,13 +93,13 @@ def f_5(game, player):
     return 1 - float(float(sum(hnodes)-1)/(game.size[axis]))
 
 
-def f_6(game, player):
-    """ Return the reciprocal of player's f_4. """
-    return 1. / (f_4(game, player)+1)
-
-def f_7(game, player):
-    """ Return the reciprocal of player's f_5. """
-    return 1. / (f_5(game, player) + 1)
+# def f_6(game, player):
+#     """ Return the reciprocal of player's f_4. """
+#     return 1. / (f_4(game, player)+1)
+# 
+# def f_7(game, player):
+#     """ Return the reciprocal of player's f_5. """
+#     return 1. / (f_5(game, player) + 1)
 
 def f_8(game, player):
     """ Evaluate the ability to extend the current bridges """
@@ -113,35 +116,34 @@ def f_8(game, player):
                         for other_conn in game.connections(game.opponent(player)):
                             if twixt.intersects(conn, other_conn) == False:
                                 ext_bridges += 1
-    return float(float(4*ext_bridges)/(game.size[0]*game.size[1]))    
+    return float(4*ext_bridges)/(game.size[0]*game.size[1])   
     
-def f_9(game, player):
-    """ Evaluate ability to win 
-    The player should choose a move leading to a win without considering
-    other heuristics - return +inf basically """
-    
-    if game.has_won(player):
-        return sys.maxint
-    else:    
-        return 0
-
-    
-def f_10(game, player):
-    """ Evaluate possibility to lose
-    The player should choose a move that is not leading to a loose. In other words,
-    If the player is in loosing situation, he should prevent the opponent from winning
-    Need to consider : maybe covered in the Minmax search already
-    """
-    if game.has_won(game.opponent(player)):
-        return -sys.maxint/2
-    else:    
-        return 0
+# def f_9(game, player):
+#     """ Evaluate ability to win 
+#     The player should choose a move leading to a win without considering
+#     other heuristics - return +inf basically """
+#     
+#     if game.has_won(player):
+#         return sys.maxint
+#     else:    
+#         return 0
+# 
+#     
+# def f_10(game, player):
+#     """ Evaluate possibility to lose
+#     The player should choose a move that is not leading to a loose. In other words,
+#     If the player is in loosing situation, he should prevent the opponent from winning
+#     Need to consider : maybe covered in the Minmax search already
+#     """
+#     if game.has_won(game.opponent(player)):
+#         return -sys.maxint/2
+#     else:    
+#         return 0
 
 def g_1(game, player):
     return f_4(game, player) - f_4(game, game.opponent(player))
 
-#fs = [f_1, f_2, f_3, f_4, f_5,  f_9, f_10]
-fs = [g_1]
+fs = [f_1, f_2, f_3, f_4, f_5]
 gs = [g_1]
 
 def get_next_states(game, depth):
