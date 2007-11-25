@@ -6,32 +6,32 @@ sys.path.append(os.getcwd())
 
 
 from pytwixt import node_twixt as twixt
-from index import render_game_board_image, ComputerPlayer
+from index import render_game_board_image
+from twixt_player import PerceptronComputerPlayer
 import twixt_heuristic as heuristic
 from random import random
 import copy
 
 def random_weights(N_heuristics):
     return [random() for i in range(N_heuristics)]
-     
 
 weights = random_weights(len(heuristic.fs))
 #weights[6] = 1
 #weights[5] = 1
 
 game = twixt.Twixt("foo", "bar", (6, 6))
-game.id = 0
 
 game.claim_node((3,2), 'foo')
-game.claim_node((2,1), 'bar')
-#game.claim_node((2,2), 'foo')
-#game.claim_node((2,3), 'bar')
-#g.claim_node((4,1), 'foo')
-render_game_board_image(game)
+
+#render_game_board_image(game)
+
 game.current_player = "foo"
 
-c1 = ComputerPlayer("foo", copy.deepcopy(weights), search_depth = 2, learning_rate=0.09)
-c2 = ComputerPlayer("bar", copy.deepcopy(weights), search_depth = 2, learning_rate=0.04)
+effs = [heuristic.f_1,heuristic.f_2,heuristic.f_3,heuristic.f_4,heuristic.f_5]
+weights = random_weights(len(effs))
+
+c1 = PerceptronComputerPlayer("muzi", effs=effs, g = heuristic.g_1, weights=weights, search_depth = 2, learning_rate=0.05)
+c2 = PerceptronComputerPlayer("thanh", effs=effs, g=heuristic.g_1, weights=copy.deepcopy(weights), search_depth = 2, learning_rate=0.04)
 
 print "Weights %s " % weights
     
@@ -52,7 +52,7 @@ while True:
     print "Player %s claimed node %s." % (game.current_player, xy)
     game.claim_node(xy, game.current_player)
     
-    game.id = "test_cp_%02i" % turn_number
+    game.id = "test_game_%02i" % turn_number
     #render_game_board_image(game)
     turn_number += 1
     render_game_board_image(game)
