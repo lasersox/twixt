@@ -2,7 +2,8 @@ import sys
 
 from pytwixt import node_twixt as twixt
 import twixt_heuristic as heuristic
-from index import PerceptronComputerPlayer, render_game_board_image
+from twixt_player import PerceptronComputerPlayer
+from index import render_game_board_image
 from random import random
 import copy
 
@@ -22,7 +23,7 @@ def train(number_of_games=100, search_depth=2):
     #  weights = [0.77115418840969974, 0.71555104743300879, -0.00081140756190061988, -0.054876323944738327, 0.3665955789374965]
     #  weights = [0.74288563817636388, 0.70486729316165075, 0.052725832294392469, -0.098542258526105236, 0.44418131498229901]
     # print "Weights for the players: %s" % weights
-    c1 = PerceptronComputerPlayer("muzi", weights, search_depth = 2, learning_rate=0.1)
+    c1 = PerceptronComputerPlayer("muzi", weights, search_depth = 2, learning_rate=0.05)
     c2 = PerceptronComputerPlayer("thanh", copy.deepcopy(weights), search_depth = 2, learning_rate=0.04)
     
     players = {"muzi": c1, "thanh":c2}
@@ -82,7 +83,7 @@ def train(number_of_games=100, search_depth=2):
         
         render_game_board_image(game)
         print "Game %s finished: Game status [Muzi,Thanh,Draw] = %s" % (n,score_status)
-        if n%100 == 0:
+        if n%5 == 0:
             print "Trained weights: %s" % c1.weights
         del game
     
