@@ -61,14 +61,8 @@ class HumanPlayer(Player):
     else:
       return HumanPlayer(name, secret).save()
 
-class ComputerPlayer(Player):
+class ComputerPlayer(object):
     
-    def __init__(self, name, weights=None, search_depth=2, learning_rate=0.05):
-        self.name = name
-        self.learning_rate = learning_rate
-        self.weights = [1./len(heuristic.fs)]*len(heuristic.fs) if not weights else weights
-        self.depth = search_depth
-            
     def next_move(self, game):
         """ Just looking at one step ahead for now 
         1. Generate all possible game states
@@ -100,12 +94,6 @@ class ComputerPlayer(Player):
         #print "Found %s." % str((next_node.x, next_node.y))
         return (next_node.x, next_node.y)
     
-    def get_score(self, game_state):
-        import math
-        f = sum(self.weights[i]*f_i(game_state, self.name) for i, f_i in enumerate(heuristic.fs))
-        n1 = math.tanh(0.5*f)
-        return 1 * n1 + 0.5 * heuristic.g_1(game_state, self.name)
-            
     def minimax_search(self, node, depth):
         
         #if this is a leaf node or having no children,
@@ -148,8 +136,21 @@ class ComputerPlayer(Player):
             game.id = "depth %s %r %r %f" % (depth, sorted(list(game.claimed_nodes())), node[2], score)
             #render_game_board_image(game)
             return max_score, max_node
-         
 
+class PerceptronComputerPlayer(ComputerPlayer):
+    
+    def __init__(self, name, weights=None, search_depth=2, learning_rate=0.05):
+        self.name = name
+        self.learning_rate = learning_rate
+        self.weights = [1./len(heuristic.fs)]*len(heuristic.fs) if not weights else weights
+        self.depth = search_depth
+    
+    def get_score(self, game_state):
+        import math
+        f = sum(self.weights[i]*f_i(game_state, self.name) for i, f_i in enumerate(heuristic.fs))
+        n1 = math.tanh(0.25*f)
+        return 1 * n1 # + 0.5 * heuristic.g_1(game_state, self.name)
+    
     def update_weights(self, expected_score, actual_score, f_scores):
         """ Compare the difference between the predicted game state
         and the current game state and update the weights.
@@ -162,7 +163,7 @@ class ComputerPlayer(Player):
         return 0
         
 
-class ComputerPlayer_HiddenNodes(ComputerPlayer):
+class NeuralComputerPlayer(ComputerPlayer):
     
     def __init__(self, name, search_depth=2):
         self.name = name
