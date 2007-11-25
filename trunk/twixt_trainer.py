@@ -13,18 +13,26 @@ def random_weights(N_heuristics):
     return [random() for i in range(N_heuristics)]
         
 
+class Dummy(object):
+    def __init__(self, name):
+        self.name = name
+
 def train(number_of_games=100, search_depth=2):
     
     assert search_depth % 2 == 0
-    weights = random_weights(len(heuristic.fs))
     # The following weights are tuned for (unscaled) 0.5 * g_1 plus output of perceptron with f_1, ..., f_5.
     #  weights = [0.80645065474968314, 0.73851632090876906, -0.018709876472095509, 0.067931480573086053, 0.341251139029706]
     #  weights = [0.78256345518575787, 0.72806061248232179, -0.047892301965649302, -0.0088772339336371277, 0.34506233417550852]
     #  weights = [0.77115418840969974, 0.71555104743300879, -0.00081140756190061988, -0.054876323944738327, 0.3665955789374965]
     #  weights = [0.74288563817636388, 0.70486729316165075, 0.052725832294392469, -0.098542258526105236, 0.44418131498229901]
-    # print "Weights for the players: %s" % weights
-    c1 = PerceptronComputerPlayer("muzi", weights, search_depth = 2, learning_rate=0.05)
-    c2 = PerceptronComputerPlayer("thanh", copy.deepcopy(weights), search_depth = 2, learning_rate=0.04)
+    
+    # These weights are due to 100 generations of the player with [f_1, f_2, ..., f_5] and g_1 (scaled.)
+    # weights = [0.8098611843515332, 0.74123044895203627, -0.039245974600852558, 0.11163072341922184, 0.35739214093828314]
+    effs = [heuristic.f_1,heuristic.f_2,heuristic.f_3,heuristic.f_4,heuristic.f_5]
+    weights = random_weights(len(effs))
+    
+    c1 = PerceptronComputerPlayer("muzi", effs=effs, g = heuristic.g_1, weights=weights, search_depth = 2, learning_rate=0.05)
+    c2 = PerceptronComputerPlayer("thanh", effs=effs, g=heuristic.g_1, weights=copy.deepcopy(weights), search_depth = 2, learning_rate=0.04)
     
     players = {"muzi": c1, "thanh":c2}
     
@@ -39,7 +47,9 @@ def train(number_of_games=100, search_depth=2):
         
         game.claim_node((2,3), c1.name)
         
-        trainee, teacher = c1, c2
+        # trainee, teacher = c1, c2
+        trainee, teacher = Dummy(""), Dummy("")
+        
         game.current_player = c2.name
         
         while True:
