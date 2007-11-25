@@ -41,7 +41,8 @@ class Node(object):
                                     # connected
     #def __hash__(self):
     #  return hash((self.x, self.y))
-
+    def __repr__(self):
+        return "(%i, %i)" % (self.x, self.y)
 class Connection(object):
     """
     This is a little throwaway class to make it easier for us to decide
@@ -213,11 +214,15 @@ class Twixt(object):
             if self.nodes[node(n)].owner == player:
                 yield self.nodes[node(n)]
     
+    def claimed_nodes(self):
+        for node in self.nodes.itervalues():
+            if node.owner != "":
+                yield (node.x, node.y)
     
     def connections(self, player=None):
         marked = set()
         for node in self.nodes.itervalues():
-            if not (player == None or node.owner == player):
+            if (player != None and node.owner != player):
                 continue
             marked.add(node)
             for other_node in node.connected_nodes:
@@ -244,8 +249,11 @@ class Twixt(object):
 
     def opponent(self, player):
         """ Return player's opponent """
-        return self.player2 if player == self.player1 else self.player1
-    
+        if player == self.player1:
+            return self.player2
+        else:
+            return self.player1
+        
     def new_node_connectable (self, node0, node1):
         """
         Check to see whether node0 can be connected to node1. It is assumed

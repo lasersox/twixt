@@ -48,38 +48,46 @@ def f_3(game, player):
     """ checking for longest path """
     if not conn_bridges:
         return 0
-    return float(float(max(conn_bridges))/(game.size[0]*game.size[1]))
+    return  max(conn_bridges) #float(float(max(conn_bridges))/(game.size[0]*game.size[1]))
 
 def f_4(game, player):
     """ looping through all the bridges and project it to the goal axis """
-    if game.player1 == player: axis = 0
-    else: axis = 1
+    if game.player1 == player:
+        edge = lambda node: node.x
+        axis = 0
+    else:
+        edge = lambda node: node.y
+        axis = 1
+    
     distance = 0
-    vnodes = [0]*game.size[0]
+    vnodes = [0]*game.size[axis]
     bridges = game.connections(player)
     
     for bridge in bridges:
-        vnodes[bridge.p0.y] = 1
-        vnodes[bridge.p1.y] = 1
-        vnodes[int(round((bridge.p0.y + bridge.p1.y)/2))] = 1
+        vnodes[edge(bridge.p0)] = 1
+        vnodes[edge(bridge.p1)] = 1
+        vnodes[(edge(bridge.p0) + edge(bridge.p1))/2] = 1
     
-    return float(float(sum(vnodes)-1)/(game.size[1]))
+    return float(float(sum(vnodes)-1)/(game.size[axis]))
 
 
 def f_5(game, player):
     """ looping through all the bridges and project it to the opponent's goal axis """
-    if game.player1 == player: axis = 1
-    else: axis = 0
+    if game.player1 == player:
+        edge = lambda node: node.y
+        axis = 0
+    else:
+        edge = lambda node: node.x
     distance = 0
     hnodes = [0]*game.size[axis]
     bridges = game.connections(player)
     
     for bridge in bridges:
-        hnodes[bridge.p0.x] = 1
-        hnodes[bridge.p1.x] = 1
-        hnodes[int(round((bridge.p0.x + bridge.p1.x)/2))] = 1
+        hnodes[edge(bridge.p0)] = 1
+        hnodes[edge(bridge.p1)] = 1
+        hnodes[int(round((edge(bridge.p0) + edge(bridge.p1))/2))] = 1
     
-    return float(float(sum(hnodes)-1)/(game.size[0]))
+    return 1 - float(float(sum(hnodes)-1)/(game.size[axis]))
 
 
 def f_6(game, player):
@@ -132,7 +140,8 @@ def f_10(game, player):
 def g_1(game, player):
     return f_4(game, player) - f_4(game, game.opponent(player))
 
-fs = [f_1, f_2, f_3, f_4, f_5, f_6, f_7, f_8]
+#fs = [f_1, f_2, f_3, f_4, f_5,  f_9, f_10]
+fs = [g_1]
 gs = [g_1]
 
 def get_next_states(game, depth):
