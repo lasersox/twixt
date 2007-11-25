@@ -141,7 +141,7 @@ def f_8(game, player):
 #         return 0
 
 def g_1(game, player):
-    return f_4(game, player) - f_4(game, game.opponent(player))
+    return (f_4(game, player) - f_4(game, game.opponent(player))) / game.size[0]
 
 fs = [f_1, f_2, f_3, f_4, f_5]
 gs = [g_1]
