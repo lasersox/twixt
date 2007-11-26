@@ -14,8 +14,8 @@ def train(number_of_games=100, search_depth=2):
     
     assert search_depth % 2 == 0
     weights = random_weights(len(heuristic.fs))
-    weights[8] = 1
-    weights[9] = 1
+    weights[len(heuristic.fs)-1] = 1
+    weights[len(heuristic.fs)-2] = 1
     # print "Weights for the players: %s" % weights
     c1 = ComputerPlayer("muzi", weights, search_depth = 2, learning_rate=0.09)
     c2 = ComputerPlayer("thanh", copy.deepcopy(weights), search_depth = 2, learning_rate=0.04)
@@ -31,7 +31,7 @@ def train(number_of_games=100, search_depth=2):
         game = twixt.Twixt(c1.name, c2.name, (6,6))
         game.id = str(n)
         
-        game.claim_node((2,3), c1.name)
+        game.claim_node((int(round(random()*(game.size[0]-3)+1)),int(round(random()*(game.size[0]-3)+1))), c1.name)
         
         trainee, teacher = c1, c2
         game.current_player = c2.name
@@ -76,7 +76,7 @@ def train(number_of_games=100, search_depth=2):
         
         #render_game_board_image(game)
         print "Game %s finished: Game status [Muzi,Thanh,Draw] = %s" % (n,score_status)
-        if n%100 == 0:
+        if n%10 == 0:
             print "Trained weights: %s" % c1.weights
         del game
     
