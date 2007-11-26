@@ -29,7 +29,7 @@ def train(number_of_games=100, search_depth=2):
     # These weights are due to 100 generations of the player with [f_1, f_2, ..., f_5] and g_1 (scaled.)
     # weights = [0.8098611843515332, 0.74123044895203627, -0.039245974600852558, 0.11163072341922184, 0.35739214093828314]
     random.seed(time.time())
-    effs = [heuristic.f_1,heuristic.f_2,heuristic.f_4,heuristic.f_5]
+    effs = [heuristic.f_1,heuristic.f_2,heuristic.f_4,heuristic.f_5, heuristic.f_8, heuristic.f_9, heuristic.f_10]
     weights = random_weights(len(effs))
     # weights = [0.83844981609926306, -0.99394129348118798, -0.45511468026300994, 0.58658195345392472, 0.064478916312243006]
     

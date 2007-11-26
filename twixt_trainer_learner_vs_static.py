@@ -30,7 +30,7 @@ def train(number_of_games=100, search_depth=2):
     # weights = [0.8098611843515332, 0.74123044895203627, -0.039245974600852558, 0.11163072341922184, 0.35739214093828314]
     
     random.seed(time.time())
-    effs = [heuristic.f_1, heuristic.f_2, heuristic.f_3, heuristic.f_4]#,heuristic.f_5]
+    effs = [heuristic.f_1,heuristic.f_2,heuristic.f_4,heuristic.f_5, heuristic.f_8, heuristic.f_9, heuristic.f_10]
     weights = random_weights(len(effs))
     # weights = [0.10030713763201238, 0.74197985760319884, 0.87776413916690466, -0.58533848002860545]
     
@@ -45,13 +45,13 @@ def train(number_of_games=100, search_depth=2):
 
         score_buffer = []
         
-        game = twixt.Twixt(c1.name, c2.name, (6,6))
+        game = twixt.Twixt(c1.name, c2.name, (8,8))
         game.id = "learner_vs_static_" + str(n)
         
         game.claim_node((2,3), c1.name)
         game.claim_node((3,2), c2.name)
         
-        trainee, teacher = c1, c2
+        trainee, teacher = c2, c1
         # trainee, teacher = Dummy(""), Dummy("")
         
         game.current_player = c1.name
@@ -76,7 +76,7 @@ def train(number_of_games=100, search_depth=2):
                 expected_score = score_buffer.pop(0)
                 actual_score = trainee.get_score(game)
                 score_buffer.append(actual_score)
-                effs = [f_i(game, trainee.name) for f_i in heuristic.fs]
+                effs = [f_i(game, trainee.name) for f_i in trainee.effs]
                 #old_weights = copy.deepcopy(trainee.weights)
                 error = trainee.update_weights(expected_score, actual_score, effs)
                 # print "error: %r" % error
@@ -98,7 +98,7 @@ def train(number_of_games=100, search_depth=2):
         render_game_board_image(game)
         print "Game %s finished: Game status [Muzi,Thanh,Draw] = %s" % (n,score_status)
         if n%5 == 0:
-            print "Trained weights: %s" % c1.weights
+            print "Trained weights: %s" % trainee.weights
         del game
     
     print "Trained weights: %s" % c1.weights

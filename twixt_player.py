@@ -153,8 +153,8 @@ class PerceptronComputerPlayer(ComputerPlayer):
         log = file("score_log.txt", "a")
         p = math.tanh(0.25*perceptron)
         g = self.g(game_state, self.name)
-        log.write("p: %f, g: %f, p - g: %f\n" % (p, g, p - g))
-        log.close()
+        # log.write("p: %f, g: %f, p - g: %f\n" % (p, g, p - g))
+        # log.close()
         return p + g
     
     def update_weights(self, expected_score, actual_score, f_scores):

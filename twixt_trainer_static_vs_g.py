@@ -10,7 +10,7 @@ import copy
 # twixt_trainer.py
 
 def random_weights(N_heuristics):
-    return [random.uniform(-1., 1.) for i in range(N_heuristics)]
+    return [random.uniform(0., 1.) for i in range(N_heuristics)]
         
 
 class Dummy(object):
@@ -29,7 +29,7 @@ def train(number_of_games=100, search_depth=2):
     # These weights are due to 100 generations of the player with [f_1, f_2, ..., f_5] and g_1 (scaled.)
     # weights = [0.8098611843515332, 0.74123044895203627, -0.039245974600852558, 0.11163072341922184, 0.35739214093828314]
     random.seed(time.time())
-    effs = [heuristic.f_1,heuristic.f_2,heuristic.f_3,heuristic.f_4,heuristic.f_5]
+    effs = [heuristic.f_1,heuristic.f_2,heuristic.f_4,heuristic.f_5, heuristic.f_8, heuristic.f_9, heuristic.f_10]
     weights = random_weights(len(effs))
     
     c1 = PerceptronComputerPlayer("muzi", effs=effs, g = heuristic.g_1, weights=weights, search_depth = 2, learning_rate=0.05)
@@ -74,7 +74,7 @@ def train(number_of_games=100, search_depth=2):
                 expected_score = score_buffer.pop(0)
                 actual_score = trainee.get_score(game)
                 score_buffer.append(actual_score)
-                effs = [f_i(game, trainee.name) for f_i in heuristic.fs]
+                effs = [f_i(game, trainee.name) for f_i in trainee.effs]
                 #old_weights = copy.deepcopy(trainee.weights)
                 error = trainee.update_weights(expected_score, actual_score, effs)
                 print "error: %r" % error
