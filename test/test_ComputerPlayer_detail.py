@@ -16,7 +16,7 @@ import copy
 def random_weights(N_heuristics):
     return [random.uniform(-1., 1.) for i in range(N_heuristics)]
 
-game = twixt.Twixt("foo", "bar", (6, 6))
+game = twixt.Twixt("foo", "bar", (10, 10))
 
 game.claim_node((2,3), 'foo')
 game.claim_node((3,2), 'bar')
@@ -50,7 +50,7 @@ while True:
     game.claim_node(xy, game.current_player)
     
     game.id = "test_game_%02i" % turn_number
-    #render_game_board_image(game)
+    render_game_board_image(game)
     turn_number += 1
     render_game_board_image(game)
     if game.has_won(game.current_player):
