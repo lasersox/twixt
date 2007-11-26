@@ -183,6 +183,7 @@ def f_10(game, player):
 
 def g_1(game, player):
     return (f_4(game, player) - f_4(game, game.opponent(player))) / game.size[0]
+    
 
 def get_next_states(game, depth):
     """ generate all possible game states at depth ahead 
