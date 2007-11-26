@@ -139,12 +139,12 @@ class ComputerPlayer(Player):
 
 class PerceptronComputerPlayer(ComputerPlayer):
     
-    def __init__(self, name, effs = [], g = [], weights=None, search_depth=2, learning_rate=0.05):
+    def __init__(self, name, effs = [], g = [], weights=[], search_depth=2, learning_rate=0.05):
         self.name = name
         self.effs = effs
         self.g = g
         self.learning_rate = learning_rate
-        self.weights = [1./len(heuristic.fs)]*len(heuristic.fs) if not weights else weights
+        self.weights = weights
         self.depth = search_depth
     
     def get_score(self, game_state):
@@ -152,7 +152,7 @@ class PerceptronComputerPlayer(ComputerPlayer):
         perceptron = sum(self.weights[i]*f_i(game_state, self.name) for i, f_i in enumerate(self.effs))
         log = file("score_log.txt", "a")
         p = math.tanh(0.25*perceptron)
-        g = 0.5 * self.g(game_state, self.name)
+        g = self.g(game_state, self.name)
         log.write("p: %f, g: %f, p - g: %f\n" % (p, g, p - g))
         log.close()
         return p + g

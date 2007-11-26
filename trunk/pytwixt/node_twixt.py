@@ -214,10 +214,13 @@ class Twixt(object):
             if self.nodes[node(n)].owner == player:
                 yield self.nodes[node(n)]
     
-    def claimed_nodes(self):
+    def claimed_nodes(self, player = ""):
         for node in self.nodes.itervalues():
-            if node.owner != "":
+            if player == "" and node.owner != "":
                 yield (node.x, node.y)
+            elif player != "" and node.owner == player:
+                yield (node.x, node.y)
+              
     
     def connections(self, player=None):
         marked = set()
