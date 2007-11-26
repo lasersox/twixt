@@ -1,16 +1,16 @@
 import sys
-
+import time
 from pytwixt import node_twixt as twixt
 import twixt_heuristic as heuristic
 from twixt_player import PerceptronComputerPlayer
 from index import render_game_board_image
-from random import random
+import random
 import copy
 
 # twixt_trainer.py
 
 def random_weights(N_heuristics):
-    return [random() for i in range(N_heuristics)]
+    return [random.uniform(-1., 1.) for i in range(N_heuristics)]
         
 
 class Dummy(object):
@@ -28,6 +28,7 @@ def train(number_of_games=100, search_depth=2):
     
     # These weights are due to 100 generations of the player with [f_1, f_2, ..., f_5] and g_1 (scaled.)
     # weights = [0.8098611843515332, 0.74123044895203627, -0.039245974600852558, 0.11163072341922184, 0.35739214093828314]
+    random.seed(time.time())
     effs = [heuristic.f_1,heuristic.f_2,heuristic.f_3,heuristic.f_4,heuristic.f_5]
     weights = random_weights(len(effs))
     
@@ -46,11 +47,12 @@ def train(number_of_games=100, search_depth=2):
         game.id = str(n)
         
         game.claim_node((2,3), c1.name)
+        game.claim_node((3,2), c2.name)
         
         # trainee, teacher = c1, c2
         trainee, teacher = Dummy(""), Dummy("")
         
-        game.current_player = c2.name
+        game.current_player = c1.name
         
         while True:
             

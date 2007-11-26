@@ -1,4 +1,5 @@
 import sys, os
+import time
 
 #sys.path.append(os.chdir("../"))
 sys.path.append("./")
@@ -9,29 +10,25 @@ from pytwixt import node_twixt as twixt
 from index import render_game_board_image
 from twixt_player import PerceptronComputerPlayer
 import twixt_heuristic as heuristic
-from random import random
+import random
 import copy
 
 def random_weights(N_heuristics):
-    return [random() for i in range(N_heuristics)]
-
-weights = random_weights(len(heuristic.fs))
-#weights[6] = 1
-#weights[5] = 1
+    return [random.uniform(-1., 1.) for i in range(N_heuristics)]
 
 game = twixt.Twixt("foo", "bar", (6, 6))
 
-game.claim_node((3,2), 'foo')
+game.claim_node((2,3), 'foo')
+game.claim_node((3,2), 'bar')
 
-#render_game_board_image(game)
-
-game.current_player = "foo"
-
+random.seed(time.time())
 effs = [heuristic.f_1,heuristic.f_2,heuristic.f_3,heuristic.f_4,heuristic.f_5]
 weights = random_weights(len(effs))
 
-c1 = PerceptronComputerPlayer("muzi", effs=effs, g = heuristic.g_1, weights=weights, search_depth = 2, learning_rate=0.05)
-c2 = PerceptronComputerPlayer("thanh", effs=effs, g=heuristic.g_1, weights=copy.deepcopy(weights), search_depth = 2, learning_rate=0.04)
+c1 = PerceptronComputerPlayer("foo", effs=effs, g = heuristic.g_1, weights=weights, search_depth = 2, learning_rate=0.05)
+c2 = PerceptronComputerPlayer("bar", effs=effs, g=heuristic.g_1, weights=copy.deepcopy(weights), search_depth = 2, learning_rate=0.04)
+
+game.current_player = "foo"
 
 print "Weights %s " % weights
     
