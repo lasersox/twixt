@@ -1,6 +1,6 @@
 import sys, os
 
-sys.path.append(os.chdir("../"))
+# sys.path.append(os.chdir("../"))
 sys.path.append(os.getcwd())
 
 
@@ -9,12 +9,14 @@ from index import render_game_board_image
 from twixt_heuristic import *
 
 g = twixt.Twixt("foo", "bar", (6, 6))
-g.id = "test"
+g.id = "test_pattern"
 
-g.claim_node((0,1), 'foo')
-g.claim_node((3,3), 'bar')
-g.claim_node((1,3), 'foo')
-g.claim_node((2,5), 'bar')
+g.claim_node((0,2), 'foo')
+g.claim_node((2,0), 'bar')
+g.claim_node((2,3), 'foo')
+g.claim_node((3,2), 'bar')
+g.claim_node((4,2), 'foo')
+g.claim_node((3,4), 'bar')
 g.claim_node((5,4), 'foo')
 render_game_board_image(g)
 g.current_player = "foo"

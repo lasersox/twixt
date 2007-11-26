@@ -15,40 +15,61 @@ def f_2(game, player):
     """ Return the difference between player's f_1 and the opponent's f_1. """
     return f_1(game, player) - f_1(game, game.opponent(player))
 
-def f_3(game, player):
-    """ checking for longest bridge """
-    bridges = list(game.connections(player))
-    conn_bridges = set()
-    
-    #print " bridges %s %s " % (bridges, len(bridges))
-    for bridge in bridges:
-        #print " bridge %s " % bridge
-        conn_nodes = set()
-        conn_nodes.add(bridge.p0)
-        conn_nodes.add(bridge.p1)
-        bridges.remove(bridge)
-        #print "bridge length : %s "  % len(conn_nodes)
-        for bridge1 in bridges:
-            #print " bridge1 %s " % bridge1
-            if bridge1.p0 in conn_nodes:
-                conn_nodes.add(bridge1.p1)
-                bridges.remove(bridge1)
-                
-            else: 
-                if bridge1.p1 in conn_nodes:
-                    conn_nodes.add(bridge1.p0)
-                    bridges.remove(bridge1)
-            
-            #print "bridge length : %s "  % len(conn_nodes)
-            
-        conn_bridges.add(len(conn_nodes)-1)
-        #print "bridge length : %s "  % len(conn_nodes)
-    
-    #print "bridge length : %s "  % conn_bridges
-    """ checking for longest path """
-    if not conn_bridges:
-        return 0
-    return  max(conn_bridges) #float(float(max(conn_bridges))/(game.size[0]*game.size[1]))
+# def f_3(game, player):
+#     """ checking for longest bridge """
+#     bridges = list(game.connections(player))
+#     print len(bridges)
+#     conn_bridges = set()
+#     
+#     #print " bridges %s %s " % (bridges, len(bridges))
+#     for bridge in bridges:
+#         #print " bridge %s " % bridge
+#         conn_nodes = set()
+#         conn_nodes.add(bridge.p0)
+#         conn_nodes.add(bridge.p1)
+#         bridges.remove(bridge)
+#         #print "bridge length : %s "  % len(conn_nodes)
+#         for bridge1 in bridges:
+#             #print " bridge1 %s " % bridge1
+#             if bridge1.p0 in conn_nodes:
+#                 conn_nodes.add(bridge1.p1)
+#                 bridges.remove(bridge1)
+#                 
+#             elif bridge1.p1 in conn_nodes:
+#                 conn_nodes.add(bridge1.p0)
+#                 bridges.remove(bridge1)
+#             
+#             #print "bridge length : %s "  % len(conn_nodes)
+#             
+#         conn_bridges.add(len(conn_nodes) - 1)
+#         #print "bridge length : %s "  % len(conn_nodes)
+#     
+#     #print "bridge length : %s "  % conn_bridges
+#     """ checking for longest path """
+#     if not conn_bridges:
+#         return 0
+#     return  max(conn_bridges) #float(float(max(conn_bridges))/(game.size[0]*game.size[1]))
+
+# def f_3(game, player):
+# 
+#     max_len = 0
+#     marked = set()
+#     
+#     # perform search
+#     for node in self.claimed_nodes(player):
+#         if node in marked: continue
+#         marked.add(node)
+#         temp_len = 0
+#         stack = set()
+#         stack.union(node.connected_nodes)
+#         while len(stack):
+#             node = stack.pop()
+#             for other_node in node.connected_nodes:
+#                 
+#                 stack.append(other_node)
+#     return False
+
+
 
 def f_4(game, player):
     """ looping through all the bridges and project it to the goal axis """
@@ -68,7 +89,7 @@ def f_4(game, player):
         vnodes[edge(bridge.p1)] = 1
         vnodes[(edge(bridge.p0) + edge(bridge.p1))/2] = 1
     
-    return float(float(sum(vnodes)-1)/(game.size[axis]))
+    return float(float(sum(vnodes))/float(game.size[axis]))
 
 
 def f_5(game, player):
@@ -88,18 +109,18 @@ def f_5(game, player):
     for bridge in bridges:
         hnodes[edge(bridge.p0)] = 1
         hnodes[edge(bridge.p1)] = 1
-        hnodes[int(round((edge(bridge.p0) + edge(bridge.p1))/2))] = 1
+        hnodes[(edge(bridge.p0) + edge(bridge.p1))/2] = 1
     
-    return 1 - float(float(sum(hnodes)-1)/(game.size[axis]))
+    return 1. - float(sum(hnodes))/game.size[axis]
 
 
-# def f_6(game, player):
-#     """ Return the reciprocal of player's f_4. """
-#     return 1. / (f_4(game, player)+1)
-# 
-# def f_7(game, player):
-#     """ Return the reciprocal of player's f_5. """
-#     return 1. / (f_5(game, player) + 1)
+def f_6(game, player):
+    """ Return the reciprocal of player's f_4. """
+    return 1. / (f_4(game, player)+1)
+
+def f_7(game, player):
+    """ Return the reciprocal of player's f_5. """
+    return 1. / (f_5(game, player) + 1)
 
 def f_8(game, player):
     """ Evaluate the ability to extend the current bridges """
@@ -149,9 +170,6 @@ def f_10(game, player):
 
 def g_1(game, player):
     return (f_4(game, player) - f_4(game, game.opponent(player))) / game.size[0]
-
-fs = [f_3, f_4, f_5, f_8, f_9, f_10]
-gs = [g_1]
 
 def get_next_states(game, depth):
     """ generate all possible game states at depth ahead 
