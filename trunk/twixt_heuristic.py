@@ -15,40 +15,53 @@ def f_2(game, player):
     """ Return the difference between player's f_1 and the opponent's f_1. """
     return f_1(game, player) - f_1(game, game.opponent(player))
 
-# def f_3(game, player):
-#     """ checking for longest bridge """
-#     bridges = list(game.connections(player))
-#     print len(bridges)
-#     conn_bridges = set()
-#     
-#     #print " bridges %s %s " % (bridges, len(bridges))
-#     for bridge in bridges:
-#         #print " bridge %s " % bridge
-#         conn_nodes = set()
-#         conn_nodes.add(bridge.p0)
-#         conn_nodes.add(bridge.p1)
-#         bridges.remove(bridge)
-#         #print "bridge length : %s "  % len(conn_nodes)
-#         for bridge1 in bridges:
-#             #print " bridge1 %s " % bridge1
-#             if bridge1.p0 in conn_nodes:
-#                 conn_nodes.add(bridge1.p1)
-#                 bridges.remove(bridge1)
-#                 
-#             elif bridge1.p1 in conn_nodes:
-#                 conn_nodes.add(bridge1.p0)
-#                 bridges.remove(bridge1)
-#             
-#             #print "bridge length : %s "  % len(conn_nodes)
-#             
-#         conn_bridges.add(len(conn_nodes) - 1)
-#         #print "bridge length : %s "  % len(conn_nodes)
-#     
-#     #print "bridge length : %s "  % conn_bridges
-#     """ checking for longest path """
-#     if not conn_bridges:
-#         return 0
-#     return  max(conn_bridges) #float(float(max(conn_bridges))/(game.size[0]*game.size[1]))
+def f_3(game, player):
+     """ checking for longest bridge """
+     bridges = list(game.connections(player))
+     #print len(bridges)
+     conn_bridges = []
+ 
+     #print " bridges %s %s " % (bridges, len(bridges))
+     conn_len = len(bridges)
+     while conn_len != 0:
+         bridge = bridges[0]
+         #print " bridge %s %s " % (bridge.p0,bridge.p1)
+         conn_nodes = []
+         conn_nodes.append(bridge.p0)
+         conn_nodes.append(bridge.p1)
+         bridges.remove(bridge)
+         #print "bridge length : %s "  % len(conn_nodes)
+         # merging here
+         for conn_bridge in conn_bridges:
+             if bridge.p0 in conn_bridge:
+                 conn_bridge.append(bridge.p1)
+                 
+             elif bridge1.p1 in conn_bridge:
+                 conn_bridge.append(bridge1.p0)
+                 bridges.remove(bridge1)
+                
+         for bridge1 in bridges:
+             #print " bridge1 %s %s " % (bridge1.p0,bridge1.p1)
+             if bridge1.p0 in conn_nodes:
+                 conn_nodes.append(bridge1.p1)
+                 bridges.remove(bridge1)
+                 
+             elif bridge1.p1 in conn_nodes:
+                 conn_nodes.append(bridge1.p0)
+                 bridges.remove(bridge1)
+         
+                 
+             #print "bridge length : %s "  % len(conn_nodes)
+                 
+         conn_bridges.append(conn_nodes)
+         conn_len = len(bridges)
+        
+   
+     #print "bridge length : %s "  % conn_bridges
+     """ checking for longest path """
+     if not conn_bridges:
+         return 0
+     return  max(conn_bridges) #float(float(max(conn_bridges))/(game.size[0]*game.size[1]))
 
 # def f_3(game, player):
 # 
