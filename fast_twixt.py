@@ -144,14 +144,15 @@ def attempt_to_connect(node, other_node, player, state):
     # returning False if the connection is blocked
     # and True if the connection is made.
     other_player = opponent_of(player)
-    potential_blockers = set((node[0]+dx, node[1]+dy) for (dx,dy) in __autoconnect_differentials)
-    potential_blockers.update(set((other_node[0]+dx, other_node[1]+dy) for (dx,dy) in __autoconnect_differentials))
+    x1, y1 = node
+    x2, y2 = other_node
+    potential_blockers = set([(x2, y1), (x1, y2), ((x1 + x2)/2, y1), ((x1 + x2)/2, y2), (x1, (y1+y2)/2), (x1, (y1+y2)/2)]).difference([node, other_node])
     potential_blockers.intersection_update(state[other_player]['nodes'])
     while len(potential_blockers):
         blocker = potential_blockers.pop()
         if blocker not in state[other_player]['connections']: continue
-        for other_blocker in state[other_player]['connections'][blocker]:
-            if intersects([node, other_node], [blocker, other_blocker]):
+        for dx,dy in __autoconnect_differentials:
+            if intersects([node, other_node], [blocker, (blocker[0]+dx, blocker[1]+dy)]):
                 return False
     # make the connection
     if node not in state[player]['connections']:
