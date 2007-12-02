@@ -35,7 +35,7 @@ def train(number_of_games=100, search_depth=2):
     # weights = [0.10030713763201238, 0.74197985760319884, 0.87776413916690466, -0.58533848002860545]
     
     c1 = PerceptronComputerPlayer("muzi",  effs=effs, g=heuristic.g_1, weights=weights, search_depth = 2, learning_rate=0.05)
-    c2 = PerceptronComputerPlayer("thanh", effs=effs, g=heuristic.g_1, weights=copy.deepcopy(weights), search_depth = 2, learning_rate=0.04)
+    c2 = PerceptronComputerPlayer("thanh", effs=effs, g=heuristic.g_1, weights=copy.deepcopy(weights), search_depth = 2, learning_rate=0.08)
     
     players = {"muzi": c1, "thanh":c2}
     
