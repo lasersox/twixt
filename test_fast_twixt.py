@@ -41,10 +41,10 @@ assert attempt_to_connect((5,2), (7,3), 'p2', test_state) == False
 assert autoconnect_others_to((5,2), 'p2', test_state) == 0
 
 test_state = copy.deepcopy(root_state)
-claim((2,4), 'p1', test_state)
-claim((4,5), 'p1', test_state)
-claim((2,6), 'p2', test_state)
-claim((1,4), 'p2', test_state)
+claim((3,2), 'p1', test_state)
+claim((3,3), 'p2', test_state)
+claim((5,1), 'p1', test_state)
+claim((2,1), 'p2', test_state)
 
 old_test_state = copy.deepcopy(test_state)
 test_state['p1']['nodes'].add((0,3))
@@ -54,7 +54,7 @@ test_state['p1']['nodes'].remove((0,3))
 assert state_hash(old_test_state) == state_hash(test_state)
 
 def get_next_move(player, state):
-    depth = 3
+    depth = 5
     best_node, best_score = None, -10
     worst_node, worst_score = None, 10
     for node in available_nodes(player, state):
