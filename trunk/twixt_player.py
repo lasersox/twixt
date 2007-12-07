@@ -212,6 +212,10 @@ class LanfrancosComputerPlayer(ComputerPlayer):
 
 class AlexsComputerPlayer(ComputerPlayer):
     def __init__(self, name, weights=None, learning_rate=0):
-            self.name = name
-            self.heuristics = 8
-            self.weights = [1./self.heuristics]*self.heuristics if not weights else weights
+        self.name = name
+    
+    def next_move(self, game):
+        from fast_twixt import get_next_move, convert_game_to_state
+        state = convert_game_to_state(game)
+        best_move = get_next_move(converted_state)
+        return best_move
