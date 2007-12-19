@@ -1,10 +1,12 @@
 # coding: utf-8
-import sys, cPickle, subprocess, copy, random, time, itertools
+import sys, cPickle, subprocess, copy, random, time, itertools, operator
 from math import *
 
-LOG = file("/tmp/twixt.log", "w")
+INF = float(sys.maxint)
+NUMBER_TRANSPOSITIONS = 250000
 
-width, height = 6,6
+width, height = 8,8
+
 game_nodes = set((x,y) for x in range(width) for y in range(height) if not x % (width-1) + y % (height-1) == 0)
 
 starting_nodes = {
@@ -23,6 +25,9 @@ reserved_nodes = {
 root_state = {"p1" : {},
               "p2" : {}}
 
+def new_game():
+    return {"p1" : {}, "p2" : {}}
+
 def state_hash(state):
     return hash(tuple([ 
         (node, tuple(sorted(connected_nodes))) \
@@ -33,7 +38,7 @@ def claim(node, player, state):
     if node in state['p1'] or node in state['p2'] or node in reserved_nodes[opponent_of(player)]:
         raise Exception("Can't claim this node.")
     autoconnect_others_to(node, player, state)
-    
+
 def opponent_of(player): return 'p1' if player == 'p2' else 'p2'
 
 def the_winner_is(player, state):
@@ -114,9 +119,10 @@ def zeta(player, state):
             longest_length = path_length + 1.
     return longest_length
     
-def heuristic_value_of(state):
-    return width*height * the_winner_is("p1", state) + zeta("p1", state) + random.uniform(0, 0.05)\
-            - width*height * the_winner_is("p2", state) - zeta("p2", state) - random.uniform(0, 0.05)
+def heuristic_value_of(player, state):
+    player_score = zeta(player, state)**2 + random.uniform(0, 0.05)
+    opponent_score = zeta(opponent_of(player), state)**2 + random.uniform(0, 0.05)
+    return player_score - opponent_score
 
 def intersects(connection, blocker):
     """
@@ -203,12 +209,22 @@ def min_dist_from_players_nodes(nodes, player, state):
             if dist < _min or _min == None:
                 _min = dist
         yield _min
-    
-def available_nodes(player, state):
-    return game_nodes \
+
+def available_nodes(player, state, trans):
+    available_nodes = list(game_nodes \
                         .difference(state['p1'].keys()) \
                         .difference(state['p2'].keys()) \
-                        .difference(reserved_nodes[opponent_of(player)])
+                        .difference(reserved_nodes[opponent_of(player)]))
+    # return available_nodes
+    next_scores = []
+    for node in available_nodes:
+        autoconnect_others_to(node, player, state)
+        _hash = state_hash(state)
+        next_scores.append(trans[_hash % NUMBER_TRANSPOSITIONS][2] if _hash % NUMBER_TRANSPOSITIONS in trans and trans[_hash % NUMBER_TRANSPOSITIONS][0] == _hash else 0.)
+        disconnect_others_from(node, player, state)
+    ordered_nodes = map(operator.itemgetter(1), sorted(zip(next_scores, available_nodes), reverse=True))
+    return ordered_nodes
+    
     
     # if not state[player]['nodes']:
     # for node in available_nodes: yield node
@@ -217,66 +233,146 @@ def available_nodes(player, state):
     # for min_dist, node in sorted(zip(avg_distance_from_players_nodes, available_nodes)):
     #     yield node
         
-def negamax(player, state, depth, alpha, beta, explored=set()):
-    if is_terminal(state) or depth == 0:
-        score = heuristic_value_of(state)
-        if score == 0 and isinstance(score, int):
-            LOG.write(str(depth) + str(state))
-            raise Exception
-        return score
+def negamax(player, state, depth, alpha, beta, transpositions, max_depth):
+    global nodes_searched
+    if the_winner_is(player, state):
+        return INF
+    elif the_winner_is(opponent_of(player), state):
+        return -INF
+    elif depth == 0:
+        return heuristic_value_of(player, state)
     else:
-        for node in available_nodes(player, state):
-            old = state_hash(state)
+        for node in available_nodes(player, state, transpositions):
             autoconnect_others_to(node, player, state)
-            if state_hash(state) in explored:
-                disconnect_others_from(node, player, state)
-                # del state[player][node]
+            _hash = state_hash(state)
+            if _hash % NUMBER_TRANSPOSITIONS in transpositions \
+                    and transpositions[_hash % NUMBER_TRANSPOSITIONS][0] == _hash \
+                    and transpositions[_hash % NUMBER_TRANSPOSITIONS][1] > max_depth:
                 continue
-            explored.add(state_hash(state))
-            score = -negamax(opponent_of(player), state, depth-1, -beta, -alpha, explored)
+            score = -negamax(opponent_of(player), state, depth-1, -beta, -alpha, transpositions, max_depth)
+            nodes_searched += 1
+            transpositions[_hash % NUMBER_TRANSPOSITIONS] = (_hash, max_depth, score)
             disconnect_others_from(node, player, state)
-            assert old == state_hash(state)
             alpha = max(alpha, score)
             if alpha >= beta:
                 return beta
         return alpha
 
-def negamax_subprocess(node, player, state, depth, alpha, beta):
+def _subprocess(*args):
     p = subprocess.Popen([sys.executable, "-u",  __file__], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-    p.stdin.write(cPickle.dumps((node, player, state, depth, alpha, beta)))
+    p.stdin.write(cPickle.dumps(args))
     p.stdin.close()
     return p
 
-def threaded_get_next_move(player, state, depth=3, concurrency=2):
-    
-    best_node, best_score = None, -100
-    nodes_to_check = set(available_nodes(player, state))
-    thread_buffer = []
-    
-    while nodes_to_check:
+def plain_get_next_move(player, state, max_depth):
+    nodes_searched = 0
+    start_time = time.time()
+    print 
+    transpositions = {}
 
+    best_node, best_score = None, -INF
+    for depth in range(1, max_depth+1):
+        nodes_to_check = available_nodes(player, state, transpositions)
+        alpha = -INF
+        beta  = INF
+        while nodes_to_check:
+            node = nodes_to_check.pop(0)
+            autoconnect_others_to(node, player, state)
+            _hash = state_hash(state)
+            nodes_searched += 1
+            score = -negamax(opponent_of(player), state, depth-1, -beta, -alpha, transpositions, depth)
+            sys.stdout.write("."); sys.stdout.flush()
+            disconnect_others_from(node, player, state)
+            transpositions[_hash % NUMBER_TRANSPOSITIONS] = (_hash, depth, score)
+            alpha = max(alpha, score)
+            if score > best_score:
+                best_node, best_score = node, score
+            if alpha >= beta:
+                # we have found a winning move... get rid of the rest of the nodes to search
+                nodes_to_check = set()
+                break
+    end_time = time.time()
+    sys.stdout.write("\n")
+    print "Best move: ", repr(best_node), best_score
+    print "# nodes_searched: ", nodes_searched
+    print "Time spent: ", end_time - start_time
+    return best_node
+
+def _threaded_get_next_move(player, state, depth, concurrency=2):
+    start_time = time.time()
+    print 
+    transpositions = {}
+    best_node, best_score = None, -INF
+    nodes_to_check = available_nodes(player, state, transpositions)
+    
+    for depth in range(1, depth+1):
+        nodes_to_check = copy.deepcopy(nodes_to_check)
+        thread_buffer = []
+        
+        while nodes_to_check or thread_buffer:
+
+            for p in thread_buffer:
+                if p.poll() is not None:
+                    thread_buffer.remove(p)
+                    node, score, _transpositions = cPickle.loads(p.stdout.read())
+                    transpositions.update(_transpositions)
+                    print "    ", node, repr(score)
+                    # p.stdout.close()
+                    if score > best_score:
+                        best_node, best_score = node, score
+                    if score == sys.maxint:
+                    #     # we have found a winning move... get rid of the rest of the nodes to search
+                        nodes_to_check = set()
+                    del p
+        
+            if nodes_to_check:
+                while len(thread_buffer) < concurrency:
+                    node = nodes_to_check.pop(0)
+                    autoconnect_others_to(node, player, state)
+                    p = _subprocess(node, opponent_of(player), state, depth-1, -INF, INF, transpositions, depth)
+                    thread_buffer.append(p)
+                    disconnect_others_from(node, player, state)
+        
+        if best_score == INF:
+            break
+        # no reason to loop as fast as possible, sleep a bit.
+        # time.sleep(0.01)
+    end_time = time.time()
+    print "Best move: ", repr(best_node), best_score
+    print "Time spent: ", end_time - start_time
+    return best_node
+
+def threaded_get_next_move(player, state, max_depth, concurrency=2):
+    nodes_searched = 0
+    start_time = time.time()
+
+    best_node, best_score = None, -INF    
+    nodes_to_check = available_nodes(player, state, {})    
+
+    # should code this to work for arbitrary # of subprocesses, but 2 will do for now. 
+    p1 = _subprocess(player, state, nodes_to_check[:len(nodes_to_check)/2], max_depth)
+    p2 = _subprocess(player, state, nodes_to_check[len(nodes_to_check)/2:], max_depth)
+
+    thread_buffer = [p1, p2]
+    while thread_buffer:
         for p in thread_buffer:
             if p.poll() is not None:
                 thread_buffer.remove(p)
-                node, score = cPickle.loads(p.stdout.read())
-                print "    ", node, repr(score)
-                # p.stdout.close()
+                node, score, _nodes_searched  = cPickle.loads(p.stdout.read())
+                nodes_searched += _nodes_searched
+                print node, score
                 if score > best_score:
                     best_node, best_score = node, score
                 del p
-        
-        while len(thread_buffer) < concurrency:
-            node = nodes_to_check.pop()
-            autoconnect_others_to(node, player, state)
-            p = negamax_subprocess(node, opponent_of(player), state, depth-1, -100., 100.)
-            thread_buffer.append(p)
-            disconnect_others_from(node, player, state)
-        # no reason to loop as fast as possible, sleep a bit.
-        time.sleep(0.01)
-        
+
+    end_time = time.time()
+    print "Best move: ", repr(best_node), best_score
+    print "# nodes searched: ", nodes_searched
+    print "Time spent: ", end_time - start_time
     return best_node
 
-# def negamax_stacked(state, depth, alpha, beta, explored=set()):
+
+# def negamax_stacked(state, depth, alpha, beta, transpositions=set()):
 #     stack = [(state, None)]
 #     while len(stack):
 #         current_state = stack.pop()
@@ -284,10 +380,10 @@ def threaded_get_next_move(player, state, depth=3, concurrency=2):
 #             return heuristic_value_of(current_state)
 #         else:
 #             for child in children_of(current_state):
-#                 if state_hash(child) in explored: continue
-#                 explored.add(current_state_hash(child))
+#                 if state_hash(child) in transpositions: continue
+#                 transpositions.add(current_state_hash(child))
 #                 stack.append(child)
-#                 score = -negamax(child, depth-1, -beta, -alpha, explored)
+#                 score = -negamax(child, depth-1, -beta, -alpha, transpositions)
 #                 alpha = max(alpha, score)
 #                 if alpha >= beta:
 #                     return beta
@@ -295,8 +391,25 @@ def threaded_get_next_move(player, state, depth=3, concurrency=2):
 
 
 if __name__ == "__main__":
+    global nodes_searched
+    nodes_searched = 0
     import sys, cPickle
-    node, player, state, depth, alpha, beta = cPickle.loads(sys.stdin.read())
-    score = -negamax(player, state, depth, alpha, beta)
-    sys.stdout.write(cPickle.dumps((node, score)))
+    player, state, nodes_to_check, max_depth = cPickle.loads(sys.stdin.read())
+    best_node, best_score = None, -INF
+    alpha, beta = -INF, INF
+    transpositions = {}
+    for depth in range(1, max_depth+1):
+        for node in nodes_to_check:
+            autoconnect_others_to(node, player, state)
+            _hash = state_hash(state)
+            score = -negamax(opponent_of(player), state, depth-1, -beta, -alpha, transpositions, depth)
+            nodes_searched += 1
+            transpositions[_hash % NUMBER_TRANSPOSITIONS] = (_hash, depth, score)
+            disconnect_others_from(node, player, state)
+            alpha = max(alpha, score)
+            if score > best_score:
+                best_node, best_score = node, score
+            if alpha >= beta:
+                break
+    sys.stdout.write(cPickle.dumps((best_node, best_score, nodes_searched)))
     sys.exit(0)

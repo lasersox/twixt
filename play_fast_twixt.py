@@ -46,10 +46,12 @@ def render_game_board_image(file_name, state, size=(8,8)):
     righ_bot = lambda nd: (int(m*(nd[0]+1) + r), int(m*(nd[1]+1) - r))
 
     center = lambda nd: (int(m*(nd[0]+1)), int(m*(nd[1]+1)))
+    
     class point(object):
         def __init__(self, x, y):
             self.x = x
             self.y = y
+    
     if aggdraw is not None:
         draw.rectangle([0, 0, size[0], size[1]], aggdraw.Brush("white"))
         draw.line(center(point(0,0.5))  + center(point(size[0]-1,0.5)),  player_pen["p2"])
@@ -65,6 +67,7 @@ def render_game_board_image(file_name, state, size=(8,8)):
                 if aggdraw is not None:
                     draw.line(center(node) + center(other_node), player_pen[player])
                 else:
+                    print node, other_node
                     draw.line([center(node), center(other_node)], fill=player_color[player], width=4)
   
         for node in state[player].keys():
