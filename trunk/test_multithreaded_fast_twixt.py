@@ -2,15 +2,18 @@
 import hotshot
 import timeit
 from play_fast_twixt import render_game_board_image
-from fast_twixt import *
+from multithreaded_fast_twixt import *
+
 
 test_state = copy.deepcopy(root_state)
-claim((0,4), 'p1', test_state)
-claim((3,0), 'p2', test_state)
-claim((2,3), 'p1', test_state)
+claim((1,2), 'p1', test_state)
+claim((2,3), 'p2', test_state)
+claim((3,3), 'p1', test_state)
 claim((2,2), 'p2', test_state)
-claim((4,2), 'p1', test_state)
-claim((1,5), 'p2', test_state)
+claim((0,3), 'p1', test_state)
+claim((4,3), 'p2', test_state)
+claim((0,4), 'p1', test_state)
+claim((1,0), 'p2', test_state)
 claim((5,4), 'p1', test_state)
 
 print zeta("p1", test_state)
